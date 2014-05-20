@@ -22,8 +22,11 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 // This is a project skeleton file
 
 import java.io.PrintStream;
+import java.util.HashMap;
 
+import org.jgrapht.graph.ClassBasedEdgeFactory;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 
 
 /** This class may be used to contain the semantic information such as
@@ -33,13 +36,15 @@ class ClassTable {
     private int semantErrors;
     private PrintStream errorStream;
     
-    private DefaultDirectedGraph<AbstractSymbol, Void> dag;
+    private DefaultDirectedGraph<AbstractSymbol, DefaultEdge> dag;
+    private HashMap<AbstractSymbol, class_c> table;
 
     /** Creates data structures representing basic Cool classes (Object,
      * IO, Int, Bool, String).  Please note: as is this method does not
      * do anything useful; you will need to edit it to make if do what
      * you want.
      * */
+    
     private void installBasicClasses() {
 	AbstractSymbol filename 
 	    = AbstractTable.stringtable.addString("<basic class>");
@@ -196,15 +201,63 @@ class ClassTable {
            Bool_class, and Str_class here */
 
 	
-    }
+		registerClass(TreeConstants.Object_, Object_class, TreeConstants.No_class);
+		registerClass(TreeConstants.IO, IO_class, TreeConstants.IO);
+		registerClass(TreeConstants.Int, Int_class, TreeConstants.Object_);
+		registerClass(TreeConstants.Bool, Bool_class, TreeConstants.Object_);
+		registerClass(TreeConstants.Str, Str_class, TreeConstants.Object_);
+		
 	
+		
+	
+    }
+	/**
+	 * This method registers in the class table and its dag, the given class 
+	 * described by its reference, its node and its parent's reference
+	 * @param cls reference to class
+	 * @param impl reference to node
+	 * @param parent reference to the parent
+	 */
+    public void registerClass(AbstractSymbol cls, class_c impl, AbstractSymbol parent)
+    {
+    	table.put(cls, impl);
+		dag.addVertex(cls);
+		dag.addEdge(cls, parent);
+    }
+    
+    /**
+     * This method registers in the class table and its dag, the given class 
+	 * described by its reference, its node. It sets the parent by calculating it.
+     * @param cls reference to class
+     * @param impl reference to node
+     * 
+     */
+    public void registerClass(AbstractSymbol cls, class_c impl)
+    {
+    	registerClass(cls, impl, impl.getParent());
+    }
+    
+    /**
+     * This method registers in the class table and its dag, the given class 
+	 * described by its node
+     * @param impl reference to node
+     */
+    public void registerClass(class_c impl)
+    {
+    	registerClass(impl.getName(), impl, impl.getParent());
+    }
 
 
     public ClassTable(Classes cls) {
-	semantErrors = 0;
-	errorStream = System.err;
+    	semantErrors = 0;
+		errorStream = System.err;
+		
+		/* fill this in */
+		table = new HashMap<AbstractSymbol, class_c>();
+		dag = new DefaultDirectedGraph<AbstractSymbol, DefaultEdge>(DefaultEdge.class);
 	
-	/* fill this in */
+		this.installBasicClasses();
+	
     }
 
     /** Prints line number and file name of the given class.

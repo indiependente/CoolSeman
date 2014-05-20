@@ -1,12 +1,16 @@
 import java.util.HashMap;
 
 
-
+/**
+ * This class implements the decorator pattern
+ * @author ventura
+ *
+ */
 abstract class Decorator
 {
 	protected HashMap<String, Object> data = null; 
 	 /**
-     * 
+     * register a key value for the current object
      * @param key
      * @param value
      */
@@ -16,7 +20,12 @@ abstract class Decorator
     		data = new HashMap<String, Object>();
     	data.put(key, value);
     }
-    
+    /**
+     * retrieves the value associated to the given key
+     * it returns null if key is not present
+     * @param key
+     * @return the value associated to the given key
+     */
     public Object getData(String key)
     {
     	if (data != null && data.containsKey(key))
@@ -25,6 +34,11 @@ abstract class Decorator
     }
 }
 
+/**
+ * 
+ * @author ventura
+ *
+ */
 interface ITreeVisitor {
 	
 	Object visit(method itm);
@@ -39,7 +53,11 @@ interface ITreeVisitor {
 	
 }
 
-
+/**
+ * 
+ * @author ventura
+ *
+ */
 interface IVisitable {
 	Object accept(ITreeVisitor visitor);
 }
