@@ -75,7 +75,6 @@ class TypeSelector
 	}
 }
 
-
 class ConcreteVisitor implements ITreeVisitor
 {
 	static TypeSelector selector = new TypeSelector();
