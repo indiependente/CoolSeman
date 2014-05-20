@@ -8,6 +8,7 @@
 
 
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.io.PrintStream;
 import java.util.Vector;
@@ -283,6 +284,10 @@ class Cases extends ListNode {
     See <a href="TreeNode.html">TreeNode</a> for full documentation. */
 class programc extends Program {
     protected Classes classes;
+    /**
+	 * Visitors list
+	 */
+	ArrayList<ITreeVisitor> visitors = new ArrayList<ITreeVisitor>();
     /** Creates "programc" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
@@ -299,7 +304,13 @@ class programc extends Program {
         out.print(Utilities.pad(n) + "programc\n");
         classes.dump(out, n+2);
     }
-
+    /**
+     * Registers a visitor in the visitor list
+     * @arg tv The visitor to be registred
+     */
+    public void registerVisitor(ITreeVisitor tv){
+    	visitors.add(tv);
+    }
     
     public void dump_with_types(PrintStream out, int n) {
         dump_line(out, n);
@@ -327,11 +338,16 @@ class programc extends Program {
 	/* ClassTable constructor may do some semantic analysis */
 	ClassTable classTable = new ClassTable(classes);
 	
+	
 	/* some semantic analysis code may go here */
 	
-	ConcreteVisitor v = new ConcreteVisitor();
-	accept(v);
+	registerVisitor(new ConcreteVisitor());
+	
+	for (ITreeVisitor tv : visitors)
+		accept(tv);
 
+	
+	
 	if (classTable.errors()) {
 	    System.err.println("Compilation halted due to static semantic errors.");
 	    System.exit(1);
@@ -761,7 +777,7 @@ class static_dispatch extends Expression {
 		 * valutare il tipo di expr, tradurre self in SELF_TYPE
 		 * fare il lookup di type_name, ma non deve essere SELF_TYPE -> farlo diventare Object [CHIEDERE A GENCOS]
 		 * vedere se expr e' sottotipo di TYPE
-		 * vedere se name è registrato per TYPE
+		 * vedere se name �� registrato per TYPE
 		 * validare actuals
 		 * vedere se per ogni param matcha con la dichiarazione del metodo
 		 * assegnare il tipo al nodo
@@ -832,7 +848,7 @@ class dispatch extends Expression {
 		/*
 		 * expr.method(params)
 		 * valutare il tipo di expr
-		 * vedere se name è registrato per type(expr)
+		 * vedere se name �� registrato per type(expr)
 		 * validare actuals
 		 * vedere se per ogni param matcha con la dichiarazione del metodo
 		 * 
