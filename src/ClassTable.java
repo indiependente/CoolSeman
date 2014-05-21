@@ -36,15 +36,30 @@ class ClassTable {
     private int semantErrors;
     private PrintStream errorStream;
     
+    /**
+     * Directed Acyclic Graph used to represent the hierarchy existing 
+     * between the classes and their types.
+     * Needed to calculate the LUB of two classes.
+     */
     private DefaultDirectedGraph<AbstractSymbol, DefaultEdge> dag;
-    private HashMap<AbstractSymbol, class_c> table;
+    
+    /**
+     * Hash Table containing the association 
+     * < ClassName, ReferenceToClassNodeInAST >
+     * 
+     * It simplifies retrieving what fields and methods
+     * a certain class offers, keeping in mind inheritance
+     * 
+     * What about a more meaningful name? xD
+     * classRegister sounds nice to me :)
+     */
+    private HashMap<AbstractSymbol, class_c> table; 
 
     /** Creates data structures representing basic Cool classes (Object,
      * IO, Int, Bool, String).  Please note: as is this method does not
      * do anything useful; you will need to edit it to make if do what
      * you want.
      * */
-    
     private void installBasicClasses() {
 	AbstractSymbol filename 
 	    = AbstractTable.stringtable.addString("<basic class>");
