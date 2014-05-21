@@ -3,16 +3,17 @@ import java.util.HashMap;
 
 /**
  * This class implements the decorator pattern
- * @author ventura
  *
  */
 abstract class Decorator
 {
 	protected HashMap<String, Object> data = null; 
+	
+	
 	 /**
      * register a key value for the current object
-     * @param key
-     * @param value
+     * @param key the decorating attribute 
+     * @param value the value of the decorating attribute
      */
     protected void decorate(String key, Object value)
     {
@@ -23,7 +24,7 @@ abstract class Decorator
     /**
      * retrieves the value associated to the given key
      * it returns null if key is not present
-     * @param key
+     * @param keythe decorating attribute
      * @return the value associated to the given key
      */
     public Object getData(String key)
@@ -35,8 +36,9 @@ abstract class Decorator
 }
 
 /**
- * 
- * @author ventura
+ *  Interface for Visitor pattern.
+ *  This interface provides a version of the visit method per each different kind of node in the AST
+ *  The concrete implementations of the  methods in this interface will implement the logic needed to process the AST's nodes
  *
  */
 interface ITreeVisitor {
@@ -53,19 +55,37 @@ interface ITreeVisitor {
 	
 }
 
+
+
 /**
- * 
- * @author ventura
+ * Interface for Visitor pattern.
+ * Each node, to be visited, must implement this interface.
  *
  */
 interface IVisitable {
+	/**
+	 * This method allows to propagate the visit of the actual node to its children
+	 * @param visitor The object visitor which will be propagated through the AST
+	 * @return the type information requested by the parent node
+	 */
 	Object accept(ITreeVisitor visitor);
 }
 
+
+
+/**
+ * Each kind of node perform always the same operations, based on its type.
+ * This interface is used to map the action of each kind of node in the AST.
+ *
+ * @param <T>
+ */
 interface IAction <T>
 {
 	void action(T obj);
 }
+
+
+
 
 class TypeSelector
 {
@@ -92,6 +112,8 @@ class TypeSelector
 		getAction(object.getClass()).action(object);
 	}
 }
+
+
 
 class ConcreteVisitor implements ITreeVisitor
 {
