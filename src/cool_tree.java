@@ -22,6 +22,8 @@ abstract class Program extends TreeNode {
     public abstract void dump_with_types(PrintStream out, int n);
     public abstract void semant();
     public abstract void cgen(PrintStream s);
+    
+    public abstract void registerVisitor(ITreeVisitor tv);
 
 }
 
@@ -284,6 +286,8 @@ class Cases extends ListNode {
     See <a href="TreeNode.html">TreeNode</a> for full documentation. */
 class programc extends Program {
     protected Classes classes;
+    protected ClassTable class_table;
+    
     /**
 	 * Visitors list
 	 */
@@ -296,6 +300,8 @@ class programc extends Program {
     public programc(int lineNumber, Classes a1) {
         super(lineNumber);
         classes = a1;
+        
+        class_table = null;
     }
     public TreeNode copy() {
         return new programc(lineNumber, (Classes)classes.copy());
@@ -308,7 +314,7 @@ class programc extends Program {
      * Registers a visitor in the visitor list
      * @arg tv The visitor to be registred
      */
-    public void registerVisitor(ITreeVisitor tv){
+    public void registerVisitor(ITreeVisitor tv) {
     	visitors.add(tv);
     }
     
@@ -334,24 +340,21 @@ class programc extends Program {
     	errors. Part (2) can be done in a second stage when you want
 	to test the complete compiler.
     */
+    
+   
     public void semant() {
-	/* ClassTable constructor may do some semantic analysis */
-	ClassTable classTable = new ClassTable(classes);
+    	/* ClassTable constructor may do some semantic analysis */
+    	class_table = new ClassTable(classes);
 	
-	
-	/* some semantic analysis code may go here */
-	
-	registerVisitor(new ConcreteVisitor());
-	
-	for (ITreeVisitor tv : visitors)
-		accept(tv);
-
-	
-	
-	if (classTable.errors()) {
-	    System.err.println("Compilation halted due to static semantic errors.");
-	    System.exit(1);
-	}
+		/* some semantic analysis code may go here */
+    	
+		for (ITreeVisitor tv : visitors)
+			accept(tv);
+		
+		if (class_table.errors()) {
+		    System.err.println("Compilation halted due to static semantic errors.");
+		    System.exit(1);
+		}
     }
     /** This method is the entry point to the code generator.  All of the work
       * of the code generator takes place within CgenClassTable constructor.
@@ -418,7 +421,7 @@ class class_c extends Class_ {
         Utilities.printEscapedString(out, filename.getString());
         out.println("\"\n" + Utilities.pad(n + 2) + "(");
         for (Enumeration e = features.getElements(); e.hasMoreElements();) {
-	    ((Feature)e.nextElement()).dump_with_types(out, n + 2);
+        	((Feature)e.nextElement()).dump_with_types(out, n + 2);
         }
         out.println(Utilities.pad(n + 2) + ")");
     }
@@ -483,7 +486,7 @@ class method extends Feature {
 	    ((Formal)e.nextElement()).dump_with_types(out, n + 2);
         }
         dump_AbstractSymbol(out, n + 2, return_type);
-	expr.dump_with_types(out, n + 2);
+        expr.dump_with_types(out, n + 2);
     }
 	@Override
 	public Object accept(ITreeVisitor visitor) {
