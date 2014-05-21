@@ -35,7 +35,7 @@ class Semant {
 			AstCup parser = new AstCup(lexer);
 			Object result = parser.parse().value;
 			Program root = (Program) result;
-
+			
 			root.registerVisitor(new ConcreteVisitor());
 
 			root.semant();

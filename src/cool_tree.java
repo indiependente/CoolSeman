@@ -351,6 +351,7 @@ class programc extends Program {
 		for (ITreeVisitor tv : visitors)
 			accept(tv);
 		
+		// move to appropiate visit method
 		if (class_table.errors()) {
 		    System.err.println("Compilation halted due to static semantic errors.");
 		    System.exit(1);

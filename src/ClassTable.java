@@ -201,6 +201,8 @@ class ClassTable {
            Bool_class, and Str_class here */
 
 	
+		dag.addVertex(TreeConstants.No_class);
+	
 		registerClass(TreeConstants.Object_, Object_class, TreeConstants.No_class);
 		registerClass(TreeConstants.IO, IO_class, TreeConstants.IO);
 		registerClass(TreeConstants.Int, Int_class, TreeConstants.Object_);

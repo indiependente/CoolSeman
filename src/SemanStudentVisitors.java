@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 
 
@@ -87,19 +88,27 @@ interface IAction <T>
 
 
 
-class TypeSelector
+class ExpressionTypeSelector
 {
-	HashMap<Class<?>, IAction<Expression>> binded_actions = new HashMap<Class<?>, IAction<Expression>>();
+	HashMap<Class<?>, ArrayList<IAction<Expression>>> binded_actions;
+	
+	public ExpressionTypeSelector()
+	{
+		binded_actions = new HashMap<Class<?>, ArrayList<IAction<Expression>>>();
+	}
 	
 	public <T extends Expression> void register(Class<?> cls, IAction<T> act)
 	{
 		if (!binded_actions.containsKey(cls))
-			binded_actions.put(cls, (IAction<Expression>) act);
-		else
-			throw new RuntimeException("already binded action for type " + cls.getName());
+			binded_actions.put(cls, new ArrayList<IAction<Expression>>());
+		//else
+		//	throw new RuntimeException("already binded action for type " + cls.getName());
+	
+		binded_actions.get(cls).add((IAction<Expression>) act);
+	
 	}
 	
-	public IAction<Expression> getAction(Class<?> cls)
+	public ArrayList<IAction<Expression>> getActions(Class<?> cls)
 	{
 		if (binded_actions.containsKey(cls))
 			return binded_actions.get(cls);
@@ -109,7 +118,8 @@ class TypeSelector
 	
 	public <T extends Expression> void execute(T object)
 	{
-		getAction(object.getClass()).action(object);
+		for (IAction<Expression> oper : getActions(object.getClass()))
+			oper.action(object);				
 	}
 }
 
@@ -117,7 +127,7 @@ class TypeSelector
 
 class ConcreteVisitor implements ITreeVisitor
 {
-	static TypeSelector selector = new TypeSelector();
+	static ExpressionTypeSelector selector = new ExpressionTypeSelector();
 	
 	static {
 		selector.register(dispatch.class, new IAction<dispatch>() {
@@ -146,7 +156,16 @@ class ConcreteVisitor implements ITreeVisitor
 
 			@Override
 			public void action(object data) {
-				//System.out.println("object");
+				System.out.println("???");
+				System.out.println(data.toString());
+			}
+			
+		});
+		selector.register(object.class, new IAction<object>() {
+
+			@Override
+			public void action(object data) {
+				System.out.println("!!!!");
 				System.out.println(data.toString());
 			}
 			
