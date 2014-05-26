@@ -466,24 +466,24 @@ class ClassTable {
      */
     public AbstractSymbol leastUpperBound(AbstractSymbol... symbols)
     {
-    	HashMap<AbstractSymbol, ArrayList<AbstractSymbol>> inheritance_list = 
+    	HashMap<AbstractSymbol, ArrayList<AbstractSymbol>> inheritance_lists = 
     			new HashMap<AbstractSymbol, ArrayList<AbstractSymbol>>();
     	
     	for (AbstractSymbol sym : symbols)
     	{
-    		inheritance_list.put(sym, getParents(sym));
-    		inheritance_list.get(sym).add(0, sym); // occorre aggiungere anche se stesso alla lista dei parent 	
+    		inheritance_lists.put(sym, getParents(sym));
+    		inheritance_lists.get(sym).add(0, sym); // occorre aggiungere anche se stesso alla lista dei parent 	
     	}
     	
-    	AbstractSymbol temp = leastUpperBound(inheritance_list.get(symbols[0]), inheritance_list.get(symbols[1]));
+    	AbstractSymbol temp = leastUpperBound(inheritance_lists.get(symbols[0]), inheritance_lists.get(symbols[1]));
     	for (int i = 2; i < symbols.length; i++)
     	{
-    		if (!inheritance_list.containsKey(temp))
+    		if (!inheritance_lists.containsKey(temp))
     		{
-    			inheritance_list.put(temp, getParents(temp));
-    			inheritance_list.get(temp).add(0, temp); 
+    			inheritance_lists.put(temp, getParents(temp));
+    			inheritance_lists.get(temp).add(0, temp); 
     		}
-    		temp = leastUpperBound(inheritance_list.get(temp), inheritance_list.get(symbols[i]));
+    		temp = leastUpperBound(inheritance_lists.get(temp), inheritance_lists.get(symbols[i]));
     	}
     	
     	return temp;
@@ -510,6 +510,70 @@ class ClassTable {
     	}    	
     	return AbstractTable.idtable.addString("Object");
     }
+    
+    /**
+     * checks if child is subclass of parent
+     * @param child the child class
+     * @param parent the parent class
+     * @return true if child is subclass of parent
+     */
+    public boolean isSubClass(Class_ child, Class_ parent)
+    {
+    	return isSubClass(child.getName(), parent.getName());
+    	
+    }
+    
+    /**
+     * checks if child is subclass of parent
+     * @param child the child class
+     * @param parent the parent class
+     * @return true if child is subclass of parent
+     */
+    public boolean isSubClass(AbstractSymbol child, AbstractSymbol parent)
+    {
+    	if (child.equals(parent))
+    		return true;
+    	ArrayList<AbstractSymbol> list = getParents(child);
+    	for (AbstractSymbol sym : list)
+    	{
+    		if (sym.equals(parent))
+    			return true;
+    	}
+    	return false;
+    }
+    
+    
+    /**
+     * checks if parent is superclass of child
+     * @param parent the parent class
+     * @param child the child class
+     * @return true if parent is superclass of child
+     */
+    public boolean isSuperClass(AbstractSymbol parent, AbstractSymbol child)
+    {
+    	if (child.equals(parent))
+    		return true;
+    	ArrayList<AbstractSymbol> list = getParents(child);
+    	for (AbstractSymbol sym : list)
+    	{
+    		if (sym.equals(parent))
+    			return true;
+    	}
+    	return false;
+    }
+    
+    /**
+     * checks if parent is superclass of child
+     * @param parent the parent class
+     * @param child the child class
+     * @return true if parent is superclass of child
+     */
+    public boolean isSuperClass(Class_ parent, Class_ child)
+    {
+    	return isSuperClass(child.getName(), parent.getName());
+    	
+    }
+    
     
 }
 			  
