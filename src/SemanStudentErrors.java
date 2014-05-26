@@ -63,7 +63,7 @@ class SemantErrorsManager
     *
     * */
    public PrintStream semantError(AbstractSymbol filename, AbstractSymbol class_name, TreeNode t) {
-   	errorStream.print(filename + ":" + class_name  + ":" + t.getLineNumber() + ": ");
+   	errorStream.print(filename + ":" + t.getLineNumber() + ": ");
    	return semantError();
    }
 
