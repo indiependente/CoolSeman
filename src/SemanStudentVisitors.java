@@ -54,6 +54,8 @@ interface ITreeVisitor {
 	Object visit(Expression expr);
 	Object visit(Expressions expressions);
 	
+	void onVisitEnd();
+	
 }
 
 
@@ -171,6 +173,13 @@ class ConcreteVisitor implements ITreeVisitor
 			
 		});
 	}
+	
+	private ClassTable class_table;
+	
+	public ConcreteVisitor(ClassTable cls_tbl)
+	{
+		class_table = cls_tbl;
+	}
 
 	@Override
 	public Object visit(method itm) {
@@ -204,6 +213,7 @@ class ConcreteVisitor implements ITreeVisitor
 	public Object visit(Class_ cls) {
 		// TODO Auto-generated method stub
 		System.out.println("Class_");
+		class_table.registerClass(cls);
 		return null;
 	}
 
@@ -234,6 +244,12 @@ class ConcreteVisitor implements ITreeVisitor
 		// TODO Auto-generated method stub
 		System.out.println("Expressions");
 		return null;
+	}
+
+	@Override
+	public void onVisitEnd() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

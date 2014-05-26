@@ -24,6 +24,7 @@ abstract class Program extends TreeNode {
     public abstract void cgen(PrintStream s);
     
     public abstract void registerVisitor(ITreeVisitor tv);
+	public abstract ClassTable getClassTable();
 
 }
 
@@ -301,7 +302,8 @@ class programc extends Program {
         super(lineNumber);
         classes = a1;
         
-        class_table = null;
+    	/* ClassTable constructor may do some semantic analysis */
+    	class_table = new ClassTable(classes);
     }
     public TreeNode copy() {
         return new programc(lineNumber, (Classes)classes.copy());
@@ -324,6 +326,7 @@ class programc extends Program {
         for (Enumeration e = classes.getElements(); e.hasMoreElements(); ) {
 	    ((Class_)e.nextElement()).dump_with_types(out, n + 2);
         }
+        class_table.dump();
     }
     /** This method is the entry point to the semantic checker.  You will
         need to complete it in programming assignment 4.
@@ -343,13 +346,16 @@ class programc extends Program {
     
    
     public void semant() {
-    	/* ClassTable constructor may do some semantic analysis */
-    	class_table = new ClassTable(classes);
+    
 	
 		/* some semantic analysis code may go here */
     	
-		for (ITreeVisitor tv : visitors)
-			accept(tv);
+		for (ITreeVisitor visitor : visitors)
+		{
+			accept(visitor);
+			visitor.onVisitEnd();
+		}
+			
 		
 		// move to appropiate visit method
 		if (class_table.errors()) {
@@ -373,6 +379,10 @@ class programc extends Program {
 		classes.accept(visitor);
 		visitor.visit(this);
 		return null;
+	}
+	@Override
+	public ClassTable getClassTable() {
+		return class_table;
 	}
 
 }

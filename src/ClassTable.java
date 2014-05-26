@@ -37,7 +37,7 @@ class ClassTable {
     private PrintStream errorStream;
     
     private DefaultDirectedGraph<AbstractSymbol, DefaultEdge> dag;
-    private HashMap<AbstractSymbol, class_c> table;
+    private HashMap<AbstractSymbol, Class_> table;
 
     /** Creates data structures representing basic Cool classes (Object,
      * IO, Int, Bool, String).  Please note: as is this method does not
@@ -220,7 +220,7 @@ class ClassTable {
 	 * @param impl reference to node
 	 * @param parent reference to the parent
 	 */
-    public void registerClass(AbstractSymbol cls, class_c impl, AbstractSymbol parent)
+    public void registerClass(AbstractSymbol cls, Class_ impl, AbstractSymbol parent)
     {
     	table.put(cls, impl);
 		dag.addVertex(cls);
@@ -234,7 +234,7 @@ class ClassTable {
      * @param impl reference to node
      * 
      */
-    public void registerClass(AbstractSymbol cls, class_c impl)
+    public void registerClass(AbstractSymbol cls, Class_ impl)
     {
     	registerClass(cls, impl, impl.getParent());
     }
@@ -244,7 +244,7 @@ class ClassTable {
 	 * described by its node
      * @param impl reference to node
      */
-    public void registerClass(class_c impl)
+    public void registerClass(Class_ impl)
     {
     	registerClass(impl.getName(), impl, impl.getParent());
     }
@@ -255,7 +255,7 @@ class ClassTable {
 		errorStream = System.err;
 		
 		/* fill this in */
-		table = new HashMap<AbstractSymbol, class_c>();
+		table = new HashMap<AbstractSymbol, Class_>();
 		dag = new DefaultDirectedGraph<AbstractSymbol, DefaultEdge>(DefaultEdge.class);
 	
 		this.installBasicClasses();
@@ -306,6 +306,14 @@ class ClassTable {
     public boolean errors() {
 	return semantErrors != 0;
     }
+	public void dump() 
+	{
+		for (AbstractSymbol sym : table.keySet())
+		{
+			System.out.println(sym.getString());
+		}
+		System.out.println(dag.toString());
+	}
 
     
 }
