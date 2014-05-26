@@ -328,7 +328,6 @@ class programc extends Program {
         for (Enumeration e = classes.getElements(); e.hasMoreElements(); ) {
 	    ((Class_)e.nextElement()).dump_with_types(out, n + 2);
         }
-        class_table.dump();
     }
 
 	public void semant() {
@@ -339,10 +338,8 @@ class programc extends Program {
 			visitor.onVisitEnd();
 		}
 
-		if (class_table.errors()) {
-			System.err.println("Compilation halted due to static semantic errors.");
-			System.exit(1);
-		}
+		SemantErrorsManager.getInstance().validate();
+		
 	}
 
 	/** This method is the entry point to the code generator.  All of the work

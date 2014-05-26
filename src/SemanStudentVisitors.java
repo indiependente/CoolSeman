@@ -193,18 +193,15 @@ class ClassesVisitor extends DefaultVisitor
 {
 	@Override
 	public Object visit(Class_ cls) {
-		ClassTable tbl = ClassTable.getInstance();
-		tbl.registerClass(cls);
+		ClassTable.getInstance().registerClass(cls);
 		return null;
 	}
 	
 	@Override
 	public void onVisitEnd() 
 	{
-		ClassTable tbl = ClassTable.getInstance();
-		
-		tbl.validate();
-		
+		ClassTable.getInstance().validate();
+		SemantErrorsManager.getInstance().validate();
 	}
 	
 }
