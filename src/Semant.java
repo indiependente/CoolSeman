@@ -36,7 +36,7 @@ class Semant {
 			Object result = parser.parse().value;
 			Program root = (Program) result;
 			
-			root.registerVisitor(new ConcreteVisitor(root.getClassTable()));
+			root.registerVisitor(new ClassesVisitor());
 
 			root.semant();
 			root.dump_with_types(System.out, 0);

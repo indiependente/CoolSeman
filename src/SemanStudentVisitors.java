@@ -125,8 +125,92 @@ class ExpressionTypeSelector
 	}
 }
 
+class DefaultVisitor implements ITreeVisitor
+{
+
+	@Override
+	public Object visit(method itm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(attr itm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Cases cases) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Program program) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Class_ cls) {
+		return null;
+	}
+
+	@Override
+	public Object visit(Formal formal) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Case branch) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Expression expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Expressions expressions) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void onVisitEnd() {
+		// TODO Auto-generated method stub
+		
+	}
+}
 
 
+class ClassesVisitor extends DefaultVisitor 
+{
+	@Override
+	public Object visit(Class_ cls) {
+		ClassTable tbl = ClassTable.getInstance();
+		tbl.registerClass(cls);
+		return null;
+	}
+	
+	@Override
+	public void onVisitEnd() 
+	{
+		ClassTable tbl = ClassTable.getInstance();
+		
+		tbl.validate();
+		
+	}
+	
+}
+
+
+/*
 class ConcreteVisitor implements ITreeVisitor
 {
 	static ExpressionTypeSelector selector = new ExpressionTypeSelector();
@@ -249,9 +333,73 @@ class ConcreteVisitor implements ITreeVisitor
 	@Override
 	public void onVisitEnd() {
 		// TODO Auto-generated method stub
+		AbstractSymbol[] list = {
+				AbstractTable.idtable.addString("Object"),
+				AbstractTable.idtable.addString("IO"),
+				AbstractTable.idtable.addString("Main"),
+				AbstractTable.idtable.addString("A"),
+				AbstractTable.idtable.addString("B")
+		};
 		
+		for (AbstractSymbol s : list)
+		{
+			System.out.println(s.getString());
+			System.out.println("------->");
+			for (AbstractSymbol el : tbl.getParents(s))
+				System.out.println(el.getString());
+			System.out.println("-------<");
+			
+			
+			
+		}
+		
+		System.out.println("Lub lista completa");
+		System.out.println(tbl.leastUpperBound(list));
+		
+		System.out.println("----lub main, b--->");
+		System.out.println(tbl.leastUpperBound(AbstractTable.idtable.addString("Main"), AbstractTable.idtable.addString("B")));
+		System.out.println("-------<");
+		
+		System.out.println("---lub a, io, object---->");
+		System.out.println(tbl.leastUpperBound(AbstractTable.idtable.addString("A"), AbstractTable.idtable.addString("IO"), AbstractTable.idtable.addString("Object")));
+		System.out.println("-------<");
+		
+		System.out.println("---lub a, b ---->");
+		System.out.println(tbl.leastUpperBound(AbstractTable.idtable.addString("A"), AbstractTable.idtable.addString("B")));
+		System.out.println("-------<");
+		
+		
+		AbstractSymbol[] list2 = {
+				AbstractTable.idtable.addString("A"),
+				AbstractTable.idtable.addString("B"),
+				AbstractTable.idtable.addString("C"),
+				AbstractTable.idtable.addString("D"),
+				AbstractTable.idtable.addString("E"),
+				AbstractTable.idtable.addString("F")
+		};
+		
+		System.out.println("Lub lista2 completa");
+		System.out.println(tbl.leastUpperBound(list2));
+		
+		
+		System.out.println("Lub A,B,C completa");
+		System.out.println(tbl.leastUpperBound(list2[0], list2[1], list2[2]));
+		
+		System.out.println("Lub A,E completa");
+		System.out.println(tbl.leastUpperBound(list2[0], list2[4]));
+		
+		System.out.println("Lub A, F completa");
+		System.out.println(tbl.leastUpperBound(list2[0], list2[5]));
+		
+		System.out.println("Lub D,E,F completa");
+		System.out.println(tbl.leastUpperBound(list2[3], list2[4], list2[5]));
+		
+		System.out.println("Lub A,B,C,D,E completa");
+		System.out.println(tbl.leastUpperBound(list2[3], list2[4], list2[0], list2[1], list2[2]));
+	}
 	}
 	
 }
 
+*/
 

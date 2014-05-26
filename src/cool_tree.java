@@ -305,7 +305,7 @@ class programc extends Program {
         classes = a1;
         
     	/* ClassTable constructor may do some semantic analysis */
-    	class_table = new ClassTable(classes);
+    	class_table = ClassTable.getInstance();
     }
     public TreeNode copy() {
         return new programc(lineNumber, (Classes)classes.copy());
@@ -2105,5 +2105,4 @@ class object extends Expression {
 
 
 }
-
 
