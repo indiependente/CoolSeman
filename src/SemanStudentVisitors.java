@@ -394,7 +394,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 */
 	public Object onVisitPostOrder(method itm) {
 		Object dynamic_return_type = itm.getData("dyn_return_type");
-		AbstractSymbol dynamic_return_type_symbol = (AbstractSymbol) dynamic_return_type;
+		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) dynamic_return_type);
 		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(itm.getReturnType());
 		try
 		{
@@ -410,9 +410,21 @@ class TypeCheckerVisitor implements ITreeVisitor
 		return null;
 	}
 
-	@Override
+	/**
+	 * it checks if attr node is semantically correct
+	 */
 	public Object onVisitPostOrder(attr itm) {
-		// TODO Auto-generated method stub
+		AbstractSymbol init_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) itm.getData("init_type"));
+		AbstractSymbol static_type_symbol = TypeCheckerHelper.inferSelfType(itm.getReturnType());
+		try
+		{
+			TypeCheckerHelper.validateType(init_type_symbol);
+			TypeCheckerHelper.validateType(static_type_symbol);
+			TypeCheckerHelper.validateCast(init_type_symbol, static_type_symbol);
+		}
+		catch(Exception e)
+		{
+		}
 		return null;
 	}
 
@@ -440,10 +452,22 @@ class TypeCheckerVisitor implements ITreeVisitor
 		return null;
 	}
 
-	@Override
+	/**
+	 * it checks if a case node is semantically correct
+	 */
 	public Object onVisitPostOrder(Case branch) {
-		// TODO Auto-generated method stub
-		return null;
+		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) branch.getData("branch_type"));
+		AbstractSymbol static_type_symbol = TypeCheckerHelper.inferSelfType(branch.getReturnType());
+		try
+		{
+			TypeCheckerHelper.validateType(branch_type_symbol);
+			TypeCheckerHelper.validateType(static_type_symbol);
+			TypeCheckerHelper.validateCast(branch_type_symbol, static_type_symbol);
+		}
+		catch(Exception e)
+		{
+		}
+		return branch_type_symbol;
 	}
 
 	@Override

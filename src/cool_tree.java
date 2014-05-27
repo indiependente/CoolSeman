@@ -240,6 +240,8 @@ abstract class Case extends TreeNode {
 	}
 	public abstract void dump_with_types(PrintStream out, int n);
 
+	public abstract AbstractSymbol getName();
+	public abstract AbstractSymbol getReturnType();
 }
 
 
@@ -561,7 +563,8 @@ class attr extends Feature {
 		 * lub
 		 */
 		visitor.onVisitPreOrder(this);
-		init.accept(visitor);
+		Object ret_init = init.accept(visitor);
+		decorate("init_type", ret_init);
 		visitor.onVisitPostOrder(this);
 		return null;
 	}
@@ -674,8 +677,19 @@ class branch extends Case {
 		 */
 		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
+		decorate("branch_type", ret_expr);
 		visitor.onVisitPostOrder(this);
 		return null;
+	}
+
+	@Override
+	public AbstractSymbol getName() {
+		return name;
+	}
+
+	@Override
+	public AbstractSymbol getReturnType() {
+		return type_decl;
 	}
 
 }
