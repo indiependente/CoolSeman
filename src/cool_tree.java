@@ -426,6 +426,7 @@ class class_c extends Class_ {
 		 * controllare che se la classe e' Main allora deve avere main senza parametri formali
 		 * main deve essere presente e non ereditato
 		 */
+		SemantState.getInstance().setCurrentClass(this);
 		features.accept(visitor);
 		visitor.visit(this);
 		return null;
@@ -494,7 +495,7 @@ class method extends Feature {
 		 * inserire controllo sul lub del tipo restituito da exprr e return_type [modularizzare]
 		 * 
 		 */
-
+		decorate("return_type", last_ret);
 		Object obj = visitor.visit(this);
 		return null;
 	}
