@@ -204,33 +204,6 @@ class ClassesVisitor extends DefaultVisitor
 	    tbl.validate();
 		SemantErrorsManager.getInstance().validate();
 		
-		AbstractSymbol[] list2 = {
-				AbstractTable.idtable.addString("A"),
-				AbstractTable.idtable.addString("B"),
-				AbstractTable.idtable.addString("C"),
-				AbstractTable.idtable.addString("D"),
-				AbstractTable.idtable.addString("E"),
-				AbstractTable.idtable.addString("F")
-		};
-		
-		System.out.println("Lub lista2 completa");
-		System.out.println(tbl.leastUpperBound(list2));
-		
-		
-		System.out.println("Lub A,B,C completa");
-		System.out.println(tbl.leastUpperBound(list2[0], list2[1], list2[2]));
-		
-		System.out.println("Lub A,E completa");
-		System.out.println(tbl.leastUpperBound(list2[0], list2[4]));
-		
-		System.out.println("Lub A, F completa");
-		System.out.println(tbl.leastUpperBound(list2[0], list2[5]));
-		
-		System.out.println("Lub D,E,F completa");
-		System.out.println(tbl.leastUpperBound(list2[3], list2[4], list2[5]));
-		
-		System.out.println("Lub A,B,C,D,E completa");
-		System.out.println(tbl.leastUpperBound(list2[3], list2[4], list2[0], list2[1], list2[2]));
 	}
 	
 }
