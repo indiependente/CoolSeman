@@ -37,7 +37,8 @@ class Semant {
 			Program root = (Program) result;
 			
 			root.registerVisitor(new ClassesVisitor());
-
+            root.registerVisitor(new TypeCheckerVisitor());
+		    
 			root.semant();
 			root.dump_with_types(System.out, 0);
 		} catch (Exception ex) {

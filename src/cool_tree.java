@@ -219,17 +219,16 @@ class Expressions extends ListNode {
 	}
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		for (Enumeration e = getElements(); e.hasMoreElements(); )
 		{
 			Expression itm = (Expression) e.nextElement();
 			itm.accept(visitor);
 		}
 		/*
-		Vector vect = getElementsVector();
-		Object obj = vect.elementAt(vect.size() - 1);
-		return ((Expression) obj).get_type();
+		
 		 */
-		return visitor.visit(this);
+		return visitor.onVisitPostOrder(this);
 	}
 }
 
@@ -270,6 +269,7 @@ class Cases extends ListNode {
 	}
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		for (Enumeration e = getElements(); e.hasMoreElements(); )
 		{
 			Case itm = (Case) e.nextElement();
@@ -278,7 +278,7 @@ class Cases extends ListNode {
 		/*
 		 * calcolare il lub di tutti i branch e restituirlo
 		 */
-		return visitor.visit(this);
+		return visitor.onVisitPostOrder(this);
 	}
 }
 
@@ -355,8 +355,9 @@ class programc extends Program {
 		/*
 		 * controllare che la classe Main sia definita
 		 */
+		visitor.onVisitPreOrder(this);
 		classes.accept(visitor);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return null;
 	}
 	@Override
@@ -426,9 +427,10 @@ class class_c extends Class_ {
 		 * controllare che se la classe e' Main allora deve avere main senza parametri formali
 		 * main deve essere presente e non ereditato
 		 */
+		visitor.onVisitPreOrder(this);
 		SemantState.getInstance().setCurrentClass(this);
 		features.accept(visitor);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return null;
 	}
 
@@ -490,7 +492,9 @@ class method extends Feature {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		formals.accept(visitor);
+		
 		Object last_ret = expr.accept(visitor);
 		/*
 		 * chiamare visitor.visit(this) per 
@@ -500,7 +504,7 @@ class method extends Feature {
 		 * 
 		 */
 		decorate("dyn_return_type", last_ret);
-		Object obj = visitor.visit(this);
+		Object obj = visitor.onVisitPostOrder(this);
 		return null;
 	}
 
@@ -556,8 +560,9 @@ class attr extends Feature {
 		 * validare tipo init
 		 * lub
 		 */
+		visitor.onVisitPreOrder(this);
 		init.accept(visitor);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return null;
 	}
 
@@ -612,7 +617,8 @@ class formalc extends Formal {
 		 * verificare che type_decl esista,
 		 * che self non sia il nome di un parametro formale
 		 */
-		visitor.visit(this);
+		visitor.onVisitPreOrder(this);
+		visitor.onVisitPostOrder(this);
 		return null;
 	}
 
@@ -666,8 +672,9 @@ class branch extends Case {
 		 * validare type_decl e name
 		 * aggiungere type_decl/name in O e passare su expr con il visitor
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return null;
 	}
 
@@ -727,8 +734,9 @@ class assign extends Expression {
 		 * verificare che non sia self
 		 * veriicare che il tipo di name possa ospitare type(expr) [modulare]
 		 */
+		visitor.onVisitPreOrder(this);
 		expr.accept(visitor);
-		visitor.visit(this); // fare set type
+		visitor.onVisitPostOrder(this); // fare set type
 		return get_type();
 	}
 
@@ -808,9 +816,10 @@ class static_dispatch extends Expression {
 		 * assegnare il tipo al nodo
 		 * 
 		 */
+		visitor.onVisitPreOrder(this);
 		expr.accept(visitor);
 		actual.accept(visitor);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -873,14 +882,15 @@ class dispatch extends Expression {
 		/*
 		 * expr.method(params)
 		 * valutare il tipo di expr
-		 * vedere se name �� registrato per type(expr)
+		 * vedere se name e'registrato per type(expr)
 		 * validare actuals
 		 * vedere se per ogni param matcha con la dichiarazione del metodo
 		 * 
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
 		actual.accept(visitor);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -939,17 +949,17 @@ class cond extends Expression {
 	
 	@Override
 	public Object accept(ITreeVisitor visitor) {
-
-		Object ret_pred = visitor.visit(pred);
-		Object ret_then_exp = visitor.visit(then_exp);
-		Object ret_else_exp = visitor.visit(else_exp);
+		visitor.onVisitPreOrder(this);
+		Object ret_pred = visitor.onVisitPostOrder(pred);
+		Object ret_then_exp = visitor.onVisitPostOrder(then_exp);
+		Object ret_else_exp = visitor.onVisitPostOrder(else_exp);
 
 		/*
 		 * valutare che ret_pred sia di sottotipo di Bool oppure metterlo Object
 		 * valutare le expr, calcolarne il lub ed impostare il tipo di ritorno
 		 */
 
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 
 		return get_type();
 	}
@@ -1009,10 +1019,11 @@ class loop extends Expression {
 		 * controllare che il tipo di pred sia  Bool
 		 * assegnare Object a loop
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_pred = pred.accept(visitor);
 		Object ret_body = body.accept(visitor);
 
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 
 		return get_type();
 	}
@@ -1076,10 +1087,11 @@ class typcase extends Expression {
 		 * validare i tipi
 		 * calcolare il lub ed assegnarlo come tipo di ritorno
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
 		Object ret_cases = cases.accept(visitor);
 		// decorare
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1134,8 +1146,9 @@ class block extends Expression {
 		/**
 		 * impostare il tipo 
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_block = body.accept(visitor);
-		return visitor.visit(this);
+		return visitor.onVisitPostOrder(this);
 	}
 
 
@@ -1207,9 +1220,10 @@ class let extends Expression {
 		 * valutare il body e calcolarne il tipo di ritorno
 		 * 
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_init = init.accept(visitor);
 		Object ret_body = body.accept(visitor);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1264,6 +1278,7 @@ class plus extends Expression {
 	
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		Object ret_e2 = e2.accept(visitor);
 		/*
@@ -1271,7 +1286,7 @@ class plus extends Expression {
 		 */
 		decorate("left", ret_e1);
 		decorate("right", ret_e2);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1326,6 +1341,7 @@ class sub extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		Object ret_e2 = e2.accept(visitor);
 		/*
@@ -1333,7 +1349,7 @@ class sub extends Expression {
 		 */
 		decorate("left", ret_e1);
 		decorate("right", ret_e2);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1387,6 +1403,7 @@ class mul extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		Object ret_e2 = e2.accept(visitor);
 		/*
@@ -1394,7 +1411,7 @@ class mul extends Expression {
 		 */
 		decorate("left", ret_e1);
 		decorate("right", ret_e2);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1448,6 +1465,7 @@ class divide extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		Object ret_e2 = e2.accept(visitor);
 		/*
@@ -1455,7 +1473,7 @@ class divide extends Expression {
 		 */
 		decorate("left", ret_e1);
 		decorate("right", ret_e2);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1504,12 +1522,13 @@ class neg extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		/*
 		 * valutare che sia intero e assegnare il tipo al nodo
 		 */
 		decorate("child", ret_e1);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1563,6 +1582,7 @@ class lt extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		Object ret_e2 = e2.accept(visitor);
 		/*
@@ -1570,7 +1590,7 @@ class lt extends Expression {
 		 */
 		decorate("left", ret_e1);
 		decorate("right", ret_e2);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1624,6 +1644,7 @@ class eq extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		Object ret_e2 = e2.accept(visitor);
 		/*
@@ -1632,7 +1653,7 @@ class eq extends Expression {
 		 */
 		decorate("left", ret_e1);
 		decorate("right", ret_e2);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1687,6 +1708,7 @@ class leq extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		Object ret_e2 = e2.accept(visitor);
 		/*
@@ -1694,7 +1716,7 @@ class leq extends Expression {
 		 */
 		decorate("left", ret_e1);
 		decorate("right", ret_e2);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1746,9 +1768,10 @@ class comp extends Expression {
 		/**
 		 * valutare e1 (bool) ed assegnare il tipo (bool)
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);	
 		decorate("child", ret_e1);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1799,7 +1822,8 @@ class int_const extends Expression {
 	
 	@Override
 	public Object accept(ITreeVisitor visitor) {
-		visitor.visit(this); //set_type(TreeConstants.Int);
+		visitor.onVisitPreOrder(this);
+		visitor.onVisitPostOrder(this); //set_type(TreeConstants.Int);
 		return get_type();
 	}
 
@@ -1848,7 +1872,8 @@ class bool_const extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
-		visitor.visit(this);
+		visitor.onVisitPreOrder(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 }
@@ -1899,7 +1924,8 @@ class string_const extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
-		visitor.visit(this); 
+		visitor.onVisitPreOrder(this);
+		visitor.onVisitPostOrder(this); 
 		return get_type();
 	}
 
@@ -1952,7 +1978,8 @@ class new_ extends Expression {
 		 * verificare che type_name sia valido
 		 * restituirlo
 		 */
-		visitor.visit(this);
+		visitor.onVisitPreOrder(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -2005,9 +2032,10 @@ class isvoid extends Expression {
 		/**
 		 * valutare e1
 		 */
+		visitor.onVisitPreOrder(this);
 		Object ret_e1 = e1.accept(visitor);
 		decorate("child", ret_e1);
-		visitor.visit(this);
+		visitor.onVisitPostOrder(this);
 		//		set_type(TreeConstants.Bool);
 		return get_type();
 	}
@@ -2053,7 +2081,8 @@ class no_expr extends Expression {
 	
 	@Override
 	public Object accept(ITreeVisitor visitor) {
-		visitor.visit(this);
+		visitor.onVisitPreOrder(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -2106,7 +2135,8 @@ class object extends Expression {
 		/*
 		 * fare il lookup nello scope corrente ed assegnare il tipo
 		 */
-		visitor.visit(this);
+		visitor.onVisitPreOrder(this);
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
