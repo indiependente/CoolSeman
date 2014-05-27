@@ -87,7 +87,7 @@ abstract class Feature extends TreeNode {
 		super(lineNumber);
 	}
 	public abstract void dump_with_types(PrintStream out, int n);
-
+	public abstract AbstractSymbol getReturnType();
 }
 
 
@@ -460,6 +460,10 @@ class method extends Feature {
 		expr = a4;
 	}
 
+	public AbstractSymbol getReturnType() {
+		return return_type;
+	}
+
 	public TreeNode copy() {
 		return new method(lineNumber, copy_AbstractSymbol(name), (Formals)formals.copy(), copy_AbstractSymbol(return_type), (Expression)expr.copy());
 	}
@@ -495,7 +499,7 @@ class method extends Feature {
 		 * inserire controllo sul lub del tipo restituito da exprr e return_type [modularizzare]
 		 * 
 		 */
-		decorate("return_type", last_ret);
+		decorate("dyn_return_type", last_ret);
 		Object obj = visitor.visit(this);
 		return null;
 	}
@@ -555,6 +559,11 @@ class attr extends Feature {
 		init.accept(visitor);
 		visitor.visit(this);
 		return null;
+	}
+
+	@Override
+	public AbstractSymbol getReturnType() {
+		return type_decl;
 	}
 
 }

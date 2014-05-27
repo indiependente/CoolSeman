@@ -217,13 +217,32 @@ class TypeCheckerHelper
 	static SemantErrorsManager semant_error = SemantErrorsManager.getInstance();
 	static SemantState semant_state = SemantState.getInstance();
 			
-	static void isValidType(Class_ current_class, AbstractSymbol cls)
+	static void validateType(AbstractSymbol cls)
 	{
 		if (!class_table.isClassRegistered(cls))
 		{
 			semant_error.semantError(semant_state.getCurrentClass(), "Invalid type %s", cls);	
+			throw new RuntimeException();
 		}
 	}
+	
+	static void validateCast(AbstractSymbol child, AbstractSymbol parent)
+	{
+		if (!child.equals(parent) || !class_table.isSubClass(child, parent))
+		{
+			semant_error.semantError(semant_state.getCurrentClass(), "Invalid cast: can't cast type %s to type %s", child, parent);	
+			throw new RuntimeException();
+		}	
+	}
+
+	public static AbstractSymbol inferSelfType(AbstractSymbol returnType) {
+		if (returnType.getString().equals("SELF_TYPE"))
+		{
+			return semant_state.getCurrentClass().getName();
+		}
+		return returnType;
+	}
+	
 }
 
 
@@ -264,9 +283,18 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object visit(method itm) {
-		Object return_type = itm.getData("return_type");
-		AbstractSymbol cls = (AbstractSymbol) return_type;
-		
+		Object dynamic_return_type = itm.getData("dyn_return_type");
+		AbstractSymbol dynamic_return_type_symbol = (AbstractSymbol) dynamic_return_type;
+		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(itm.getReturnType());
+		try
+		{
+			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
+			TypeCheckerHelper.validateType(static_return_type_symbol);
+			TypeCheckerHelper.validateCast(dynamic_return_type_symbol, static_return_type_symbol);
+		}
+		catch (RuntimeException e)
+		{		
+		}
 		return null;
 	}
 
