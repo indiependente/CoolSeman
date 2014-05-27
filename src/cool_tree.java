@@ -136,7 +136,8 @@ abstract class Formal extends TreeNode {
 		super(lineNumber);
 	}
 	public abstract void dump_with_types(PrintStream out, int n);
-
+	public abstract AbstractSymbol getName();
+	public abstract AbstractSymbol getTypeDecl();
 }
 
 
@@ -478,6 +479,38 @@ class method extends Feature {
 		expr = a4;
 	}
 
+	public AbstractSymbol getName() {
+		return name;
+	}
+
+	public void setName(AbstractSymbol name) {
+		this.name = name;
+	}
+
+	public Formals getFormals() {
+		return formals;
+	}
+
+	public void setFormals(Formals formals) {
+		this.formals = formals;
+	}
+
+	public AbstractSymbol getReturn_type() {
+		return return_type;
+	}
+
+	public void setReturn_type(AbstractSymbol return_type) {
+		this.return_type = return_type;
+	}
+
+	public Expression getExpr() {
+		return expr;
+	}
+
+	public void setExpr(Expression expr) {
+		this.expr = expr;
+	}
+
 	public AbstractSymbol getReturnType() {
 		return return_type;
 	}
@@ -621,7 +654,23 @@ class formalc extends Formal {
 		name = a1;
 		type_decl = a2;
 	}
+	
+	public AbstractSymbol getName() {
+		return name;
+	}
 
+	public void setName(AbstractSymbol name) {
+		this.name = name;
+	}
+
+	public AbstractSymbol getTypeDecl() {
+		return type_decl;
+	}
+
+	public void setTypeDecl(AbstractSymbol type_decl) {
+		this.type_decl = type_decl;
+	}
+	
 	public TreeNode copy() {
 		return new formalc(lineNumber, copy_AbstractSymbol(name), copy_AbstractSymbol(type_decl));
 	}

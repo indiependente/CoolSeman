@@ -35,11 +35,15 @@ class FeaturesTable
 	 */
 	public void registerAttr(attr a)
 	{
+		/*	Check if the attribute is already defined	*/
+		if (featuresList.containsKey(a.getFeatureName()))
+			SemantErrorsManager.getInstance()
+			.semantError(SemantState.getInstance().getCurrentClass(), "Attribute is multiply defined.");
 		
 		if (a.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  
-				TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
+			TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
 		else
-				TypeCheckerHelper.validateType(a.getReturnType());
+			TypeCheckerHelper.validateType(a.getReturnType());
 
 		featuresList.put( a.getFeatureName(), a );
 	}
@@ -50,16 +54,21 @@ class FeaturesTable
 	 */
 	public void registerMethod(method m)
 	{
-		/*	Method's return type checking	*/
-		if (m.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  
-				TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
-		else
-				TypeCheckerHelper.validateType(m.getReturnType());
+		/*	Check if the method is already defined	*/
+		if (featuresList.containsKey(m.getFeatureName()))
+			SemantErrorsManager.getInstance()
+			.semantError(SemantState.getInstance().getCurrentClass(), "Method is multiply defined.");
 		
-		/*	Formals' type checking	*/
-		for (Enumeration e = m.formals.getElements(); e.hasMoreElements(); )
+		/*	Method return type checking	*/
+		if (m.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  
+			TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
+		else
+			TypeCheckerHelper.validateType(m.getReturnType());
+		
+		/*	Formals type checking	*/
+		for (Enumeration e = m.getFormals().getElements(); e.hasMoreElements(); )
 		{
-			TypeCheckerHelper.validateType(((formalc )e).type_decl);	//this cast should be safe
+			TypeCheckerHelper.validateType( ((Formal)e.nextElement()).getTypeDecl() );	//this cast should be safe
 		}
 		
 		featuresList.put( m.getFeatureName(), m );
