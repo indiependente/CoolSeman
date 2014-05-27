@@ -40,7 +40,7 @@ abstract class Class_ extends TreeNode implements IVisitable {
 	public abstract AbstractSymbol getParent();
 	public abstract AbstractSymbol getFilename();
 	public abstract Features getFeatures();
-
+	public abstract FeaturesTable getFeaturesTable();
 }
 
 
@@ -87,7 +87,8 @@ abstract class Feature extends TreeNode {
 		super(lineNumber);
 	}
 	public abstract void dump_with_types(PrintStream out, int n);
-
+	
+	public abstract AbstractSymbol getFeatureName();
 }
 
 
@@ -375,6 +376,7 @@ class class_c extends Class_ {
 	protected AbstractSymbol parent;
 	protected Features features;
 	protected AbstractSymbol filename;
+	protected FeaturesTable featuresTable;
 	/** Creates "class_c" AST node. 
 	 *
 	 * @param lineNumber the line in the source file from which this node came.
@@ -430,6 +432,10 @@ class class_c extends Class_ {
 		features.accept(visitor);
 		visitor.visit(this);
 		return null;
+	}
+	@Override
+	public FeaturesTable getFeaturesTable() {
+		return featuresTable;
 	}
 
 }
@@ -500,6 +506,12 @@ class method extends Feature {
 		return null;
 	}
 
+	@Override
+	public AbstractSymbol getFeatureName()
+	{
+		return name;
+	}
+
 }
 
 
@@ -555,6 +567,12 @@ class attr extends Feature {
 		init.accept(visitor);
 		visitor.visit(this);
 		return null;
+	}
+	
+	@Override
+	public AbstractSymbol getFeatureName()
+	{
+		return name;
 	}
 
 }
