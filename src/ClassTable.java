@@ -296,21 +296,12 @@ class ClassTable {
     
 	/**
 	 * This method checks if there is a cycle in the inheritance graph
-	 * @return true if there is a cycle
+	 * 
 	 */
 	public void validateDag() 
 	{
-		
-		/*
-			hello_world.cl:26: Class C, or an ancestor of C, is involved in an inheritance cycle.
-hello_world.cl:21: Class B, or an ancestor of B, is involved in an inheritance cycle.
-hello_world.cl:17: Class A, or an ancestor of A, is involved in an inheritance cycle.
-hello_world.cl:12: Class D, or an ancestor of D, is involved in an inheritance cycle.
-hello_world.cl:8: Class E, or an ancestor of E, is involved in an inheritance cycle.
-Compilation halted due to static semantic errors.
-
-		*/
 		CycleDetector<AbstractSymbol, DefaultEdge> detector = new CycleDetector<AbstractSymbol, DefaultEdge>(dag); 
+		HashMap<AbstractSymbol, AbstractSymbol> error_vertices = new HashMap<AbstractSymbol, AbstractSymbol>();
 		if (detector.detectCycles())
 		{
 			//semantError(c.getFilename(), c.getName(), c);
@@ -318,14 +309,27 @@ Compilation halted due to static semantic errors.
 			for (AbstractSymbol sym : bad_vertices)
 			{
 				Class_ cls = table.get(sym);
-				SemantErrorsManager.getInstance().semantError(cls, "creates a cycle");
+				Set<DefaultEdge> involved_edges = dag.incomingEdgesOf(sym);
+//				SemantErrorsManager.getInstance().semantError(cls, "Class %s, or an ancestor of %s, is envolved in an inheritance cycle.", sym, sym);
+				for (DefaultEdge edge : involved_edges)
+				{
+//					SemantErrorsManager.getInstance().semantError(cls, "Class %s, or an ancestor of %s, is envolved in an inheritance cycle.", dag.getEdgeSource(edge), sym);
+					error_vertices.put(dag.getEdgeSource(edge), sym);
+				}
+				error_vertices.put(sym, sym);
 			}
+		}
+		for (AbstractSymbol sym : error_vertices.keySet())
+		{
+			Class_ cls = table.get(sym);
+			SemantErrorsManager.getInstance().semantError(cls, "Class %s, or an ancestor of %s, is envolved in an inheritance cycle.", sym, error_vertices.get(sym));
+
 		}
 	}
 	
 	/**
 	 * This method checks if a class has a valid parent
-	 * if such situation happens, a semantError is raised
+	 * if such situation does not happen, a semantError is raised
 	 * otherwise, edge (node, parent) is added in the inheritance graph
 	 */
 	public void validateTable() 
@@ -438,15 +442,15 @@ Compilation halted due to static semantic errors.
      */
     private AbstractSymbol leastUpperBound(ArrayList<AbstractSymbol> list_sym1, ArrayList<AbstractSymbol> list_sym2)
     {
-    	for (AbstractSymbol it1 : list_sym1)
+    	HashMap<AbstractSymbol, Boolean> map = new HashMap<AbstractSymbol, Boolean>();
+    	for (AbstractSymbol it : list_sym2)
     	{
-    		for (AbstractSymbol it2 : list_sym2)
-    		{
-    			if (it1.equals(it2))
-    			{
-    				return it1;
-    			}
-    		}
+    		map.put(it, true);
+		}
+    	for (AbstractSymbol it : list_sym1)
+    	{
+    		if(map.containsKey(it)) 
+    			return it;
     	}    	
     	return AbstractTable.idtable.addString("Object");
     }

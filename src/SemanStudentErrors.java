@@ -51,6 +51,23 @@ class SemantErrorsManager
 	   stream.println(msg);
 	   return stream;
   }
+  
+  /** Prints line number and file name of the given class,
+   * prints the custom message, formatting it with args
+   * Also increments semantic error count.
+   *
+   * @param c the class
+   * @param msg the message to be formatted and printed
+   * @param args the values to be shown
+   * @return a print stream to which the rest of the error message is
+   * to be printed.
+   *
+   * */
+  public PrintStream semantError(Class_ c, String msg, Object... args) {
+	   PrintStream stream = semantError(c.getFilename(), c.getName(),  c);
+	   stream.println(String.format(msg, args));
+	   return stream;
+  }
 
    /** Prints the file name and the line number of the given tree node.
     *
