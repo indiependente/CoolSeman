@@ -277,6 +277,38 @@ class ClassesVisitor extends DefaultVisitor
 	
 }
 
+/**
+ * This is the second visit executed on the AST.
+ * Registers all the features for every Class in the AST. 
+ *
+ */
+class FeaturesVisitor extends DefaultVisitor
+{
+	@Override
+	public Object onVisitPostOrder(attr attr) {
+		Class_ cls = SemantState.getInstance().getCurrentClass();
+		cls.getFeaturesTable().registerAttr(attr);
+		/*	TEST	*/
+		System.out.println(attr.name.str + ": " + cls.getFeaturesTable().isAttributeRegistered(attr.name));
+		/*	END TEST	*/
+		return null;
+	}
+	
+	@Override
+	public Object onVisitPostOrder(method meth) {
+		Class_ cls = SemantState.getInstance().getCurrentClass();
+		cls.getFeaturesTable().registerMethod(meth);
+		/*	TEST	*/
+		System.out.println(meth.name.str + ": " + cls.getFeaturesTable().isMethodRegistered(meth.name));
+		/*	END TEST	*/
+		return null;
+	}
+	
+	@Override
+	public void onVisitEnd() 
+	{
+	}
+}
 
 
 /**

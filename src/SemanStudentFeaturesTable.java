@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -28,19 +27,42 @@ class FeaturesTable
 	{
 		this.owner = c;
 		featuresList = new HashMap< AbstractSymbol , Feature >();
-		registerFeatures();
 	}
 	
 	/**
-	 * Registers all and only the features of the class owner.
+	 * Registers an attributes of the class owner.
+	 * @param a The Feature to be registered.
 	 */
-	private void registerFeatures()
+	public void registerAttr(attr a)
 	{
-		for (Enumeration e = owner.getFeatures().getElements(); e.hasMoreElements(); )
+		
+		if (a.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  
+				TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
+		else
+				TypeCheckerHelper.validateType(a.getReturnType());
+
+		featuresList.put( a.getFeatureName(), a );
+	}
+	
+	/**
+	 * Registers a method of the class owner.
+	 * @param m The Feature to be registered.
+	 */
+	public void registerMethod(method m)
+	{
+		/*	Method's return type checking	*/
+		if (m.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  
+				TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
+		else
+				TypeCheckerHelper.validateType(m.getReturnType());
+		
+		/*	Formals' type checking	*/
+		for (Enumeration e = m.formals.getElements(); e.hasMoreElements(); )
 		{
-			Feature f = (Feature) e.nextElement();
-			featuresList.put( f.getFeatureName(), f );
+			TypeCheckerHelper.validateType(((formalc )e).type_decl);	//this cast should be safe
 		}
+		
+		featuresList.put( m.getFeatureName(), m );
 	}
 	
 	/**
@@ -89,8 +111,13 @@ class FeaturesTable
 				return null;
 	}
 	
+	public boolean isAttributeRegistered(AbstractSymbol sym)
+	{
+		return lookupAttr(sym) != null;
+	}
 	
-	
-	/*		TEST		*/
-	
+	public boolean isMethodRegistered(AbstractSymbol sym)
+	{
+		return lookupMethod(sym) != null;
+	}
 }

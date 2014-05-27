@@ -394,6 +394,7 @@ class class_c extends Class_ {
 		parent = a2;
 		features = a3;
 		filename = a4;
+		featuresTable = new FeaturesTable(this);
 	}
 	public TreeNode copy() {
 		return new class_c(lineNumber, copy_AbstractSymbol(name), copy_AbstractSymbol(parent), (Features)features.copy(), copy_AbstractSymbol(filename));
@@ -437,8 +438,13 @@ class class_c extends Class_ {
 		visitor.onVisitPostOrder(this);
 		return null;
 	}
+	
 	@Override
 	public FeaturesTable getFeaturesTable() {
+		
+		if ( featuresTable == null )
+			featuresTable = new FeaturesTable(this);
+		
 		return featuresTable;
 	}
 
