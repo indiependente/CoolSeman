@@ -209,6 +209,123 @@ class ClassesVisitor extends DefaultVisitor
 }
 
 
+
+
+class TypeCheckerHelper 
+{
+	static ClassTable class_table = ClassTable.getInstance();
+	static SemantErrorsManager semant_error = SemantErrorsManager.getInstance();
+	static SemantState semant_state = SemantState.getInstance();
+			
+	static void isValidType(Class_ current_class, AbstractSymbol cls)
+	{
+		if (!class_table.isClassRegistered(cls))
+		{
+			semant_error.semantError(semant_state.getCurrentClass(), "Invalid type %s", cls);	
+		}
+	}
+}
+
+
+
+class SemantState 
+{
+	static SemantState state=null;
+	private Class_ current_class;
+	private SemantState()
+	{
+		current_class = null;
+	}
+	
+	public void setCurrentClass(Class_ cls)
+	{
+		current_class = cls;
+	}
+	
+	static SemantState getInstance()
+	{
+		if (state==null) {
+			state = new SemantState();
+		}
+		return state;
+	}
+	
+	public Class_ getCurrentClass()
+	{
+		return current_class;
+	}
+}
+
+
+
+
+class TypeCheckerVisitor implements ITreeVisitor
+{
+
+	@Override
+	public Object visit(method itm) {
+		Object return_type = itm.getData("return_type");
+		AbstractSymbol cls = (AbstractSymbol) return_type;
+		
+		return null;
+	}
+
+	@Override
+	public Object visit(attr itm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Cases cases) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Program program) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Class_ cls) {
+		
+		return null;
+	}
+
+	@Override
+	public Object visit(Formal formal) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Case branch) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Expression expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object visit(Expressions expressions) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void onVisitEnd() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}
+
 /*
 class ConcreteVisitor implements ITreeVisitor
 {
