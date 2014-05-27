@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Vector;
 
 
 /**
@@ -44,15 +45,25 @@ abstract class Decorator
  */
 interface ITreeVisitor {
 	
-	Object visit(method itm);
-	Object visit(attr itm);
-	Object visit(Cases cases);
-	Object visit(Program program);
-	Object visit(Class_ cls);
-	Object visit(Formal formal);
-	Object visit(Case branch);
-	Object visit(Expression expr);
-	Object visit(Expressions expressions);
+	Object onVisitPostOrder(method itm);
+	Object onVisitPostOrder(attr itm);
+	Object onVisitPostOrder(Cases cases);
+	Object onVisitPostOrder(Program program);
+	Object onVisitPostOrder(Class_ cls);
+	Object onVisitPostOrder(Formal formal);
+	Object onVisitPostOrder(Case branch);
+	Object onVisitPostOrder(Expression expr);
+	Object onVisitPostOrder(Expressions expressions);
+	
+	Object onVisitPreOrder(method itm);
+	Object onVisitPreOrder(attr itm);
+	Object onVisitPreOrder(Cases cases);
+	Object onVisitPreOrder(Program program);
+	Object onVisitPreOrder(Class_ cls);
+	Object onVisitPreOrder(Formal formal);
+	Object onVisitPreOrder(Case branch);
+	Object onVisitPreOrder(Expression expr);
+	Object onVisitPreOrder(Expressions expressions);
 	
 	void onVisitEnd();
 	
@@ -129,54 +140,54 @@ class DefaultVisitor implements ITreeVisitor
 {
 
 	@Override
-	public Object visit(method itm) {
+	public Object onVisitPostOrder(method itm) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(attr itm) {
+	public Object onVisitPostOrder(attr itm) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Cases cases) {
+	public Object onVisitPostOrder(Cases cases) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Program program) {
+	public Object onVisitPostOrder(Program program) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Class_ cls) {
+	public Object onVisitPostOrder(Class_ cls) {
 		return null;
 	}
 
 	@Override
-	public Object visit(Formal formal) {
+	public Object onVisitPostOrder(Formal formal) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Case branch) {
+	public Object onVisitPostOrder(Case branch) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Expression expr) {
+	public Object onVisitPostOrder(Expression expr) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Expressions expressions) {
+	public Object onVisitPostOrder(Expressions expressions) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -186,13 +197,71 @@ class DefaultVisitor implements ITreeVisitor
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Object onVisitPreOrder(method itm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(attr itm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Cases cases) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Program program) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Class_ cls) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Formal formal) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Case branch) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Expression expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Expressions expressions) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 
-
+/**
+ * this is the first visit executed on the AST
+ * it collects every type declared
+ *
+ */
 class ClassesVisitor extends DefaultVisitor 
 {
 	@Override
-	public Object visit(Class_ cls) {
+	public Object onVisitPostOrder(Class_ cls) {
 		ClassTable.getInstance().registerClass(cls);
 		return null;
 	}
@@ -210,24 +279,66 @@ class ClassesVisitor extends DefaultVisitor
 
 
 
-
+/**
+ * this class helps the TypeChecker in common operations
+ * see declared methods javadoc for further informations
+ *
+ */
 class TypeCheckerHelper 
 {
 	static ClassTable class_table = ClassTable.getInstance();
 	static SemantErrorsManager semant_error = SemantErrorsManager.getInstance();
 	static SemantState semant_state = SemantState.getInstance();
-			
-	static void isValidType(Class_ current_class, AbstractSymbol cls)
+	
+	/**
+	 * this method checks if the class is registered in the classTable
+	 * @param cls the class to check
+	 */
+	static void validateType(AbstractSymbol cls)
 	{
 		if (!class_table.isClassRegistered(cls))
 		{
 			semant_error.semantError(semant_state.getCurrentClass(), "Invalid type %s", cls);	
+			throw new RuntimeException();
 		}
 	}
+	
+	/**
+	 * this method checks if it's possible to cast a certain class to another one,
+	 * that is if former class is equal or a subclass of the latter
+	 * @param child 
+	 * @param parent
+	 */
+	static void validateCast(AbstractSymbol child, AbstractSymbol parent)
+	{
+		if (!child.equals(parent) || !class_table.isSubClass(child, parent))
+		{
+			semant_error.semantError(semant_state.getCurrentClass(), "Invalid cast: can't cast type %s to type %s", child, parent);	
+			throw new RuntimeException();
+		}	
+	}
+
+	/**
+	 * this method retrieves the real type of a symbol
+	 * @param returnType the type to check
+	 * @return the AbstractSymbol associated. 
+	 * If it's a SELF_TYPE then it returns the current class
+	 */
+	public static AbstractSymbol inferSelfType(AbstractSymbol returnType) {
+		if (returnType.getString().equals("SELF_TYPE"))
+		{
+			return semant_state.getCurrentClass().getName();
+		}
+		return returnType;
+	}
+	
 }
 
 
-
+/**
+ * this class tracks the current semantic state
+ * 
+ */
 class SemantState 
 {
 	static SemantState state=null;
@@ -237,11 +348,19 @@ class SemantState
 		current_class = null;
 	}
 	
+	/**
+	 * this method set the current class
+	 * @param cls the class to set
+	 */
 	public void setCurrentClass(Class_ cls)
 	{
 		current_class = cls;
 	}
 	
+	/**
+	 * this method retrieves the current state
+	 * @return current state
+	 */
 	static SemantState getInstance()
 	{
 		if (state==null) {
@@ -250,6 +369,10 @@ class SemantState
 		return state;
 	}
 	
+	/**
+	 * this method retrieves the current class
+	 * @return current class
+	 */
 	public Class_ getCurrentClass()
 	{
 		return current_class;
@@ -258,70 +381,144 @@ class SemantState
 
 
 
-
+/**
+ * this is the third visit of the AST 
+ * it checks types
+ *
+ */
 class TypeCheckerVisitor implements ITreeVisitor
 {
 
-	@Override
-	public Object visit(method itm) {
-		Object return_type = itm.getData("return_type");
-		AbstractSymbol cls = (AbstractSymbol) return_type;
+	/**
+	 * this method analyses if a method node is semantically correct 
+	 */
+	public Object onVisitPostOrder(method itm) {
+		Object dynamic_return_type = itm.getData("dyn_return_type");
+		AbstractSymbol dynamic_return_type_symbol = (AbstractSymbol) dynamic_return_type;
+		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(itm.getReturnType());
+		try
+		{
+			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
+			TypeCheckerHelper.validateType(static_return_type_symbol);
+			TypeCheckerHelper.validateCast(dynamic_return_type_symbol, static_return_type_symbol);
+		}
+		catch (RuntimeException e)
+		{		
+		}
+			
 		
 		return null;
 	}
 
 	@Override
-	public Object visit(attr itm) {
+	public Object onVisitPostOrder(attr itm) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Cases cases) {
+	public Object onVisitPostOrder(Cases cases) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Program program) {
+	public Object onVisitPostOrder(Program program) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Class_ cls) {
+	public Object onVisitPostOrder(Class_ cls) {
 		
 		return null;
 	}
 
 	@Override
-	public Object visit(Formal formal) {
+	public Object onVisitPostOrder(Formal formal) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Case branch) {
+	public Object onVisitPostOrder(Case branch) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object visit(Expression expr) {
+	public Object onVisitPostOrder(Expression expr) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public Object visit(Expressions expressions) {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * this method returns the type of the last expression
+	 */
+	public Object onVisitPostOrder(Expressions expressions) {
+		Vector vect = expressions.getElementsVector();
+		Object obj = vect.elementAt(vect.size() - 1);
+		return ((Expression) obj).get_type();
 	}
 
 	@Override
 	public void onVisitEnd() {
-		// TODO Auto-generated method stub
+		SemantErrorsManager.getInstance().validate();
 		
+	}
+
+	@Override
+	public Object onVisitPreOrder(method itm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(attr itm) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Cases cases) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Program program) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Class_ cls) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Formal formal) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Case branch) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Expression expr) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object onVisitPreOrder(Expressions expressions) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
