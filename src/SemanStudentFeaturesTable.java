@@ -222,11 +222,10 @@ class FeaturesTable
 	}
 
 	/**
-	 * Takes two enumerations list and compare their types
-	 * @param eForm
-	 * @param eAct
-	 * @param inheritMode	If true checks if a param type is subclass of the original declared.
-	 * @return
+	 * Takes two enumerations parameter list and compare their types.
+	 * @param eForm	List of formals params
+	 * @param eAct	List of actuals params
+	 * @return True if the actuals' types are same or subclass of formals' types.
 	 */
 	private boolean validateFormals(Enumeration eForm, Enumeration eAct)
 	{
