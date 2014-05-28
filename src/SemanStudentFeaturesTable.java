@@ -40,7 +40,7 @@ class FeaturesTable
 			SemantErrorsManager.getInstance()
 			.semantError(SemantState.getInstance().getCurrentClass(), "Attribute is multiply defined.");
 		
-		if (a.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  
+		if (a.getReturnType().getString().equals("SELF_TYPE"))  
 			TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
 		else
 			TypeCheckerHelper.validateType(a.getReturnType());
@@ -58,19 +58,62 @@ class FeaturesTable
 		if (featuresList.containsKey(m.getFeatureName()))
 			SemantErrorsManager.getInstance()
 			.semantError(SemantState.getInstance().getCurrentClass(), "Method is multiply defined.");
-		
+
+		/*	Check for overriding: 
+		 * 	If m overrides a method x,
+		 * 	it must have the same formals and return type as x	*/
+		method ancestorMeth = lookupMethod(m.getFeatureName());
+		if (ancestorMeth != null)	/*	so you're overriding it uh	*/
+		{	
+			/*	redefined method does not match original return type	*/
+			if (!ancestorMeth.getReturnType().getString().equals(m.getReturnType().getString()))
+				SemantErrorsManager.getInstance()
+				.semantError(SemantState.getInstance().getCurrentClass(),
+						"In redefined method "+ m.getName().getString() 
+						+ ", return type "+ m.getReturnType().getString()
+						+ " is different from original return type "+ ancestorMeth.getReturnType().getString() +" .");
+
+			/*	Check for formals types	
+			 * (can't use validateFormals 'cause it checks type for pair Expression - Formal)
+			 * */
+			Enumeration mForm = m.getFormals().getElements();
+			Enumeration ancestorMethForm = ancestorMeth.getFormals().getElements();
+
+			while(mForm.hasMoreElements() && ancestorMethForm.hasMoreElements())
+			{
+				Formal ancestorParam = (Formal) ancestorMethForm.nextElement();
+				Formal mParam = (Formal) mForm.nextElement();
+
+				/*	redefined method param does not match original param's type	*/
+				if(!mParam.getTypeDecl().equals(ancestorParam.getTypeDecl()))
+					SemantErrorsManager.getInstance()
+					.semantError(SemantState.getInstance().getCurrentClass(),
+							"In redefined method "+m.getName().getString()
+							+ ", parameter type "+mParam.getTypeDecl().getString()
+							+ " is different from original type "
+							+ ancestorParam.getTypeDecl().getString());	
+			}
+
+			/*	If method m has more or less parameters than his ancestor's method	*/
+			if(mForm.hasMoreElements() || ancestorMethForm.hasMoreElements() )
+				SemantErrorsManager.getInstance()
+				.semantError(SemantState.getInstance().getCurrentClass(),
+						"Incompatible number of formal parameters in redefined method "+
+								m.getName().getString() + ".");
+		}	/*	End of overriding checks	*/
+
 		/*	Method return type checking	*/
-		if (m.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  
+		if (m.getReturnType().getString().equals("SELF_TYPE"))  
 			TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
 		else
 			TypeCheckerHelper.validateType(m.getReturnType());
-		
+
 		/*	Formals type checking	*/
 		for (Enumeration e = m.getFormals().getElements(); e.hasMoreElements(); )
 		{
-			TypeCheckerHelper.validateType( ((Formal)e.nextElement()).getTypeDecl() );	//this cast should be safe
+			TypeCheckerHelper.validateType( ((Formal)e.nextElement()).getTypeDecl() );
 		}
-		
+
 		featuresList.put( m.getFeatureName(), m );
 	}
 	
@@ -90,7 +133,7 @@ class FeaturesTable
 		}
 
 		else
-			if (!owner.getName().equals("Object"))
+			if (!owner.getName().getString().equals("Object"))
 				return ClassTable.getInstance().lookup(owner.getParent()).getFeaturesTable().lookupAttr(sym);
 			else
 				return null;
@@ -107,15 +150,18 @@ class FeaturesTable
 	{
 		if ( featuresList.containsKey(sym) )
 		{
-
 			if(featuresList.get(sym) instanceof method)
 				return (method) featuresList.get(sym);
 			else return null;
 		}
 
 		else
-			if (!owner.getName().equals("Object"))
-				return ClassTable.getInstance().lookup(owner.getParent()).getFeaturesTable().lookupMethod(sym);
+			if (!owner.getName().getString().equals("Object"))
+			{
+				return ClassTable.getInstance().lookup(owner.getParent())
+						.getFeaturesTable()
+						.lookupMethod(sym);
+			}
 			else
 				return null;
 	}
@@ -179,9 +225,11 @@ class FeaturesTable
 	 * Takes two enumerations list and compare their types
 	 * @param eForm
 	 * @param eAct
+	 * @param inheritMode	If true checks if a param type is subclass of the original declared.
 	 * @return
 	 */
-	private boolean validateFormals(Enumeration eForm, Enumeration eAct) {
+	private boolean validateFormals(Enumeration eForm, Enumeration eAct)
+	{
 		while(eForm.hasMoreElements() && eAct.hasMoreElements())
 		{
 			Expression actualParam = (Expression) eAct.nextElement();

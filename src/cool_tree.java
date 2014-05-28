@@ -495,10 +495,6 @@ class method extends Feature {
 		this.formals = formals;
 	}
 
-	public AbstractSymbol getReturn_type() {
-		return return_type;
-	}
-
 	public void setReturn_type(AbstractSymbol return_type) {
 		this.return_type = return_type;
 	}
