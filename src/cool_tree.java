@@ -837,6 +837,7 @@ class assign extends Expression {
     <p>
     See <a href="TreeNode.html">TreeNode</a> for full documentation. */
 class static_dispatch extends Expression {
+
 	protected Expression expr;
 	protected AbstractSymbol type_name;
 	protected AbstractSymbol name;
@@ -912,6 +913,22 @@ class static_dispatch extends Expression {
 		return get_type();
 	}
 
+	public Expression getExpr() {
+		return expr;
+	}
+
+	public AbstractSymbol getType_name() {
+		return type_name;
+	}
+
+	public AbstractSymbol getName() {
+		return name;
+	}
+
+	public Expressions getActual() {
+		return actual;
+	}
+
 
 }
 
@@ -982,6 +999,19 @@ class dispatch extends Expression {
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
+	
+	public Expression getExpr() {
+		return expr;
+	}
+	
+	public AbstractSymbol getName() {
+		return name;
+	}
+	
+	public Expressions getActual() {
+		return actual;
+	}
+
 
 
 }

@@ -47,7 +47,7 @@ class FeaturesTable
 
 		featuresList.put( a.getFeatureName(), a );
 	}
-	
+	  
 	/**
 	 * Registers a method of the class owner.
 	 * @param m The Feature to be registered.
@@ -120,6 +120,24 @@ class FeaturesTable
 				return null;
 	}
 	
+	
+	/**
+	 * Checks if the AbstractSymbol sym that represents the Feature,
+	 * belongs to the owner class' methods.
+	 * @param sym	The feature to be checked
+	 * @return	The method node associated to the sym parameter.
+	 */
+	public method lookupStaticMethod(AbstractSymbol sym)
+	{
+		if(featuresList.containsKey(sym))
+		{
+			return (method) featuresList.get(sym);
+		}
+		return null;
+	}
+	
+	
+	
 	public boolean isAttributeRegistered(AbstractSymbol sym)
 	{
 		return lookupAttr(sym) != null;
@@ -128,5 +146,79 @@ class FeaturesTable
 	public boolean isMethodRegistered(AbstractSymbol sym)
 	{
 		return lookupMethod(sym) != null;
+	}
+	
+	public boolean isStaticMethodRegistered(AbstractSymbol sym)
+	{
+		return lookupStaticMethod(sym) != null;
+	}
+	
+	
+	/**
+	 * This method checks if a dispatch node respects the signature of the method
+	 * @param d the dispatch node to validate
+	 * @return true if the dispatch is correct, else false
+	 */
+	public boolean validateDispatch(dispatch d){
+		AbstractSymbol dName = d.getName();
+		method meth = lookupMethod(dName);
+		
+		if(meth == null)
+			return false;
+		
+		Expressions actuals = d.getActual();
+		Formals formals = meth.getFormals();
+		
+		Enumeration eForm = formals.getElements();
+		Enumeration eAct = actuals.getElements();
+				
+		return validateFormals(eForm, eAct);
+	}
+
+	/**
+	 * Takes two enumerations list and compare their types
+	 * @param eForm
+	 * @param eAct
+	 * @return
+	 */
+	private boolean validateFormals(Enumeration eForm, Enumeration eAct) {
+		while(eForm.hasMoreElements() && eAct.hasMoreElements())
+		{
+			Expression actualParam = (Expression) eAct.nextElement();
+			Formal formalParam = (Formal) eForm.nextElement();
+			//if the actual param is subclass of the formal param then continues, else exit
+			if(!ClassTable.getInstance().isSubClass(actualParam.get_type(), formalParam.getTypeDecl()))
+				return false;
+		}
+		
+		//if the dispatch uses more params than the params needed, one of the two lists has still some elements
+		//so the invocation is wrong
+		if(eForm.hasMoreElements() || eAct.hasMoreElements() )
+			return false;
+		
+		return true;
+	}
+	
+	
+	/**
+	 * This method checks if a static dispatch node respects the signature of the method
+	 * @param sd the static dispatch node to validate
+	 * @return true if the static dispatch is correct, else false
+	 */
+	public boolean validateStaticDispatch(static_dispatch sd)
+	{
+		AbstractSymbol sdName = sd.getName();
+		method meth = lookupStaticMethod(sdName);
+		
+		if(meth == null)
+			return false;
+		
+		Expressions actuals = sd.getActual();
+		Formals formals = meth.getFormals();
+		
+		Enumeration eForm = formals.getElements();
+		Enumeration eAct = actuals.getElements();
+				
+		return validateFormals(eForm, eAct);
 	}
 }
