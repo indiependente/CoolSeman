@@ -57,7 +57,7 @@ class FeaturesTable
 		/*	Check if the method is already defined	*/
 		if (featuresList.containsKey(m.getFeatureName()))
 			SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(), "Method is multiply defined.");
+			.semantError(SemantState.getInstance().getCurrentClass(), "Method %s is multiply defined.", m.getFeatureName());
 		
 		/*	Method return type checking	*/
 		if (m.getReturnType().equals(AbstractTable.idtable.addString("SELF_TYPE")))  

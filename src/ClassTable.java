@@ -241,6 +241,12 @@ class ClassTable {
 	 */
     public void registerClass(AbstractSymbol cls, Class_ impl, AbstractSymbol parent)
     {
+    	if (table.containsKey(cls))
+    	{
+    		SemantErrorsManager.getInstance().semantError(impl, "Class %s was previously defined", cls);
+    		return;
+    	}
+    	
     	table.put(cls, impl);
     	dag.addVertex(cls);
     
