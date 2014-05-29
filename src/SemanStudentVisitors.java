@@ -95,7 +95,7 @@ interface IVisitable {
  */
 interface IAction <T>
 {
-	void action(T obj);
+	Object action(T obj);
 }
 
 
@@ -103,25 +103,24 @@ interface IAction <T>
 
 class ExpressionTypeSelector
 {
-	HashMap<Class<?>, ArrayList<IAction<Expression>>> binded_actions;
+	HashMap<Class<?>, IAction<Expression>> binded_actions;
 	
 	public ExpressionTypeSelector()
 	{
-		binded_actions = new HashMap<Class<?>, ArrayList<IAction<Expression>>>();
+		binded_actions = new HashMap<Class<?>, IAction<Expression>>();
 	}
 	
 	public <T extends Expression> void register(Class<?> cls, IAction<T> act)
 	{
 		if (!binded_actions.containsKey(cls))
-			binded_actions.put(cls, new ArrayList<IAction<Expression>>());
-		//else
-		//	throw new RuntimeException("already binded action for type " + cls.getName());
+			binded_actions.put(cls, (IAction<Expression>) act);
+		else
+			throw new RuntimeException("already binded action for type " + cls.getName());
 	
-		binded_actions.get(cls).add((IAction<Expression>) act);
 	
 	}
 	
-	public ArrayList<IAction<Expression>> getActions(Class<?> cls)
+	public IAction<Expression> getAction(Class<?> cls)
 	{
 		if (binded_actions.containsKey(cls))
 			return binded_actions.get(cls);
@@ -129,10 +128,9 @@ class ExpressionTypeSelector
 			throw new RuntimeException("binded action for type " + cls.getName() + " not found");
 	}
 	
-	public <T extends Expression> void execute(T object)
+	public <T extends Expression> Object execute(T object)
 	{
-		for (IAction<Expression> oper : getActions(object.getClass()))
-			oper.action(object);				
+		return getAction(object.getClass()).action(object);				
 	}
 }
 
@@ -385,11 +383,20 @@ class SemantState
 {
 	static SemantState state=null;
 	private Class_ current_class;
+	private SymbolTable scope_manager;
+	
 	private SemantState()
 	{
 		current_class = null;
+		scope_manager = new SymbolTable();
 	}
 	
+	public SymbolTable getScopeManager() 
+	{
+		return scope_manager;
+	}
+
+
 	/**
 	 * this method set the current class
 	 * @param cls the class to set
@@ -430,6 +437,52 @@ class SemantState
  */
 class TypeCheckerVisitor implements ITreeVisitor
 {
+	
+	protected ExpressionTypeSelector selector;
+	protected SemantState semant_state = SemantState.getInstance();
+	
+	public TypeCheckerVisitor()
+	{
+		selector = new ExpressionTypeSelector();
+		
+		selector.register(object.class, new IAction<object>()
+		{
+			@Override
+			public Object action(object obj) 
+			{
+				return obj.set_type((AbstractSymbol) semant_state.getScopeManager().lookup(obj.getName()));	
+			}
+	
+		});
+		
+		selector.register(isvoid.class, new IAction<isvoid>()
+		{
+			@Override
+			public Object action(isvoid obj) 
+			{
+				return obj.set_type(TreeConstants.Bool);	
+			}
+	
+		});
+		
+		selector.register(new_.class, new IAction<new_>()
+		{
+			@Override
+			public Object action(new_ obj) 
+			{
+				AbstractSymbol type = obj.getTypeName();
+				try 
+				{
+					TypeCheckerHelper.validateType(type);
+				} 
+				catch (SemanticException e) {
+				}
+				return obj.set_type(type);	
+			}
+	
+		});
+		
+	}
 
 	/**
 	 * this method analyses if a method node is semantically correct 
@@ -513,9 +566,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 	}
 
 	@Override
-	public Object onVisitPostOrder(Expression expr) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object onVisitPostOrder(Expression expr) 
+	{
+		return selector.execute(expr);
 	}
 
 	/**

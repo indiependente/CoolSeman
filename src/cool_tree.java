@@ -2051,6 +2051,8 @@ class string_const extends Expression {
     <p>
     See <a href="TreeNode.html">TreeNode</a> for full documentation. */
 class new_ extends Expression {
+	
+
 	protected AbstractSymbol type_name;
 	
 	/** Creates "new_" AST node. 
@@ -2072,6 +2074,10 @@ class new_ extends Expression {
 		dump_AbstractSymbol(out, n+2, type_name);
 	}
 
+	public AbstractSymbol getTypeName() {
+		return type_name;
+	}
+	
 	public void dump_with_types(PrintStream out, int n) {
 		dump_line(out, n);
 		out.println(Utilities.pad(n) + "_new");
@@ -2219,6 +2225,11 @@ class object extends Expression {
 	public object(int lineNumber, AbstractSymbol a1) {
 		super(lineNumber);
 		name = a1;
+	}
+	
+	public AbstractSymbol getName()
+	{
+		return name;
 	}
 	
 	public TreeNode copy() {
