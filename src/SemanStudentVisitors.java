@@ -307,9 +307,19 @@ class FeaturesVisitor extends DefaultVisitor
 	@Override
 	public void onVisitEnd() 
 	{
+		SemantErrorsManager.getInstance().validate();
 	}
 }
 
+
+class SemanticException extends Exception
+{
+	private static final long serialVersionUID = 1L;
+	public SemanticException()
+	{
+		super();
+	}
+}
 
 /**
  * this class helps the TypeChecker in common operations
@@ -326,12 +336,12 @@ class TypeCheckerHelper
 	 * this method checks if the class is registered in the classTable
 	 * @param cls the class to check
 	 */
-	static void validateType(AbstractSymbol cls)
+	static void validateType(AbstractSymbol cls) throws SemanticException
 	{
 		if (!class_table.isClassRegistered(cls))
 		{
 			semant_error.semantError(semant_state.getCurrentClass(), "Invalid type %s", cls);	
-			throw new RuntimeException();
+			throw new SemanticException();
 		}
 	}
 	
@@ -341,12 +351,12 @@ class TypeCheckerHelper
 	 * @param child 
 	 * @param parent
 	 */
-	static void validateCast(AbstractSymbol child, AbstractSymbol parent)
+	static void validateCast(AbstractSymbol child, AbstractSymbol parent) throws SemanticException
 	{
 		if (!child.equals(parent) || !class_table.isSubClass(child, parent))
 		{
 			semant_error.semantError(semant_state.getCurrentClass(), "Invalid cast: can't cast type %s to type %s", child, parent);	
-			throw new RuntimeException();
+			throw new SemanticException();
 		}	
 	}
 
@@ -434,7 +444,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 			TypeCheckerHelper.validateType(static_return_type_symbol);
 			TypeCheckerHelper.validateCast(dynamic_return_type_symbol, static_return_type_symbol);
 		}
-		catch (RuntimeException e)
+		catch (SemanticException e)
 		{		
 		}
 			
