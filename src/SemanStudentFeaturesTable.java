@@ -53,10 +53,14 @@ class FeaturesTable
 			return;
 		}
 		
-		if (a.getReturnType().getString().equals("SELF_TYPE"))  
-			TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
-		else
-			TypeCheckerHelper.validateType(a.getReturnType());
+		try {
+			TypeCheckerHelper.validateType(TypeCheckerHelper.inferSelfType(a.getReturnType()));
+		} catch (SemanticException e) {
+			SemantErrorsManager.getInstance()
+			.semantError(SemantState.getInstance().getCurrentClass(), "Class %s of attribute %s is undefined.", 
+					a.getReturnType(), a.getFeatureName());
+			return;
+		}
 
 		featuresList.put( a.getFeatureName(), a );
 	}
@@ -91,51 +95,88 @@ class FeaturesTable
 						+ " is different from original return type "+ ancestorMeth.getReturnType().getString() +" .");
 				return;
 			}
-			/*	Check for formals types	
-			 * (can't use validateFormals 'cause it checks type for pair Expression - Formal)
-			 * */
-			Enumeration mForm = m.getFormals().getElements();
-			Enumeration ancestorMethForm = ancestorMeth.getFormals().getElements();
-
-			while(mForm.hasMoreElements() && ancestorMethForm.hasMoreElements())
-			{
-				Formal ancestorParam = (Formal) ancestorMethForm.nextElement();
-				Formal mParam = (Formal) mForm.nextElement();
-
-				/*	redefined method param does not match original param's type	*/
-				if(!mParam.getTypeDecl().equals(ancestorParam.getTypeDecl()))
-				{
-					SemantErrorsManager.getInstance()
-					.semantError(SemantState.getInstance().getCurrentClass(),
-							"In redefined method "+m.getName().getString()
-							+ ", parameter type "+mParam.getTypeDecl().getString()
-							+ " is different from original type "
-							+ ancestorParam.getTypeDecl().getString());	
-					return;
-				}
-			}
-
-			/*	If method m has more or less parameters than his ancestor's method	*/
-			if(mForm.hasMoreElements() || ancestorMethForm.hasMoreElements() )
-				SemantErrorsManager.getInstance()
-				.semantError(SemantState.getInstance().getCurrentClass(),
-						"Incompatible number of formal parameters in redefined method "+
-								m.getName().getString() + ".");
+			if (!validateFormals(m, ancestorMeth))
+				return;
 		}	/*	End of overriding checks	*/
 
 		/*	Method return type checking	*/
-		if (m.getReturnType().getString().equals("SELF_TYPE"))  
-			TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
-		else
-			TypeCheckerHelper.validateType(m.getReturnType());
-
+		try {
+			TypeCheckerHelper.validateType(TypeCheckerHelper.inferSelfType(m.getReturnType()));
+		} catch (SemanticException e) {
+			SemantErrorsManager.getInstance()
+			.semantError(SemantState.getInstance().getCurrentClass(),
+					"Undefined return type %s in method %s.",
+					m.getReturnType(), m.getName());
+			return;
+		}
+		
 		/*	Formals type checking	*/
 		for (Enumeration e = m.getFormals().getElements(); e.hasMoreElements(); )
 		{
-			TypeCheckerHelper.validateType( ((Formal)e.nextElement()).getTypeDecl() );
+			Formal f = (Formal) e.nextElement();
+			AbstractSymbol as = f.getTypeDecl();
+			/*	Declared type for Formal is SELF_TYPE*/
+			if (as.getString().equals("SELF_TYPE"))
+			{
+				SemantErrorsManager.getInstance()
+				.semantError(SemantState.getInstance().getCurrentClass(),
+						"Formal parameter %s cannot have type SELF_TYPE.",
+						f.getName(), f.getTypeDecl());
+				return;
+			}
+			try {
+				TypeCheckerHelper.validateType( f.getTypeDecl() );
+			} catch (SemanticException exc) {
+				/*	Undefined class for parameter type*/
+				SemantErrorsManager.getInstance()
+				.semantError(SemantState.getInstance().getCurrentClass(),
+						"Class %s of formal parameter %s is undefined.",
+						f.getTypeDecl(), f.getName());
+				return;
+			}
+			
+			
 		}
 
 		featuresList.put( m.getFeatureName(), m );
+	}
+
+	/**	Check for formals types.
+	 * @param m
+	 * @param ancestorMeth
+	 * @return True if both methods have got the same formals, false otherwise.
+	 */
+	private boolean validateFormals(method m, method ancestorMeth) {
+		Enumeration mForm = m.getFormals().getElements();
+		Enumeration ancestorMethForm = ancestorMeth.getFormals().getElements();
+
+		while(mForm.hasMoreElements() && ancestorMethForm.hasMoreElements())
+		{
+			Formal ancestorParam = (Formal) ancestorMethForm.nextElement();
+			Formal mParam = (Formal) mForm.nextElement();
+
+			/*	redefined method param does not match original param's type	*/
+			if(!mParam.getTypeDecl().equals(ancestorParam.getTypeDecl()))
+			{
+				SemantErrorsManager.getInstance()
+				.semantError(SemantState.getInstance().getCurrentClass(),
+						"In redefined method "+m.getName().getString()
+						+ ", parameter type "+mParam.getTypeDecl().getString()
+						+ " is different from original type "
+						+ ancestorParam.getTypeDecl().getString());	
+				return false;
+			}
+		}
+
+		/*	If method m has more or less parameters than his ancestor's method	*/
+		if(mForm.hasMoreElements() || ancestorMethForm.hasMoreElements() )
+		{	SemantErrorsManager.getInstance()
+			.semantError(SemantState.getInstance().getCurrentClass(),
+					"Incompatible number of formal parameters in redefined method "+
+							m.getName().getString() + ".");
+			return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -239,7 +280,7 @@ class FeaturesTable
 		Enumeration eForm = formals.getElements();
 		Enumeration eAct = actuals.getElements();
 				
-		return validateFormals(eForm, eAct);
+		return validateActualsFormals(eForm, eAct);
 	}
 
 	/**
@@ -248,7 +289,7 @@ class FeaturesTable
 	 * @param eAct	List of actuals params
 	 * @return True if the actuals' types are same or subclass of formals' types.
 	 */
-	private boolean validateFormals(Enumeration eForm, Enumeration eAct)
+	private boolean validateActualsFormals(Enumeration eForm, Enumeration eAct)
 	{
 		while(eForm.hasMoreElements() && eAct.hasMoreElements())
 		{
@@ -287,6 +328,6 @@ class FeaturesTable
 		Enumeration eForm = formals.getElements();
 		Enumeration eAct = actuals.getElements();
 				
-		return validateFormals(eForm, eAct);
+		return validateActualsFormals(eForm, eAct);
 	}
 }
