@@ -333,14 +333,15 @@ class TypeCheckerHelper
 	static SemantState semant_state = SemantState.getInstance();
 	
 	/**
-	 * this method checks if the class is registered in the classTable
+	 * This method checks if the class is registered in the classTable.
+	 * Handle correctly the Semantic Exception in a try-catch block.
 	 * @param cls the class to check
 	 */
 	static void validateType(AbstractSymbol cls) throws SemanticException
 	{
 		if (!class_table.isClassRegistered(cls))
 		{
-			semant_error.semantError(semant_state.getCurrentClass(), "Invalid type %s", cls);	
+			/*semant_error.semantError(semant_state.getCurrentClass(), "Invalid type %s", cls);	*/
 			throw new SemanticException();
 		}
 	}
