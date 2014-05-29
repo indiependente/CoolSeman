@@ -358,6 +358,12 @@ class TypeCheckerHelper
 			throw new SemanticException();
 		}	
 	}
+	
+	static void typeMatch(AbstractSymbol as1, AbstractSymbol as2) throws SemanticException
+	{
+		if(!as1.equals(as2)) 
+			throw new SemanticException();
+	}
 
 	/**
 	 * this method retrieves the real type of a symbol
@@ -502,7 +508,15 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(comp obj) 
 			{
-				return obj.set_type(TreeConstants.Str);	
+				AbstractSymbol child_type = (AbstractSymbol) obj.getData("child");
+				try {
+					TypeCheckerHelper.validateType(child_type);
+					TypeCheckerHelper.typeMatch(child_type, TreeConstants.Bool);
+				} catch (SemanticException e) {
+					semant_errors.semantError(obj, "Argument of 'not' has type %s instead of Bool.", child_type);	
+				}
+				
+				return obj.set_type(TreeConstants.Bool);	
 			}
 	
 		});
