@@ -37,8 +37,21 @@ class FeaturesTable
 	{
 		/*	Check if the attribute is already defined	*/
 		if (featuresList.containsKey(a.getFeatureName()))
+		{
 			SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(), "Attribute is multiply defined.");
+			.semantError(SemantState.getInstance().getCurrentClass(), "Attribute %s is multiply defined.", 
+					a.getFeatureName());
+			return;
+		}
+		
+		/*	Check if the attribute is already defined in an ancestor class	*/
+		if (lookupAttr(a.getFeatureName()) != null)
+		{
+			SemantErrorsManager.getInstance()
+			.semantError(SemantState.getInstance().getCurrentClass(), "Attribute %s is an attribute of an inherited class.", 
+					a.getFeatureName());
+			return;
+		}
 		
 		if (a.getReturnType().getString().equals("SELF_TYPE"))  
 			TypeCheckerHelper.validateType(SemantState.getInstance().getCurrentClass().getName());
@@ -56,9 +69,13 @@ class FeaturesTable
 	{
 		/*	Check if the method is already defined	*/
 		if (featuresList.containsKey(m.getFeatureName()))
+		{
 			SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(), "Method is multiply defined.");
-
+			.semantError(SemantState.getInstance().getCurrentClass(), "Method %s is multiply defined.",
+					m.getFeatureName());
+			return;
+		}
+		
 		/*	Check for overriding: 
 		 * 	If m overrides a method x,
 		 * 	it must have the same formals and return type as x	*/
@@ -67,12 +84,14 @@ class FeaturesTable
 		{	
 			/*	redefined method does not match original return type	*/
 			if (!ancestorMeth.getReturnType().getString().equals(m.getReturnType().getString()))
+			{	
 				SemantErrorsManager.getInstance()
 				.semantError(SemantState.getInstance().getCurrentClass(),
 						"In redefined method "+ m.getName().getString() 
 						+ ", return type "+ m.getReturnType().getString()
 						+ " is different from original return type "+ ancestorMeth.getReturnType().getString() +" .");
-
+				return;
+			}
 			/*	Check for formals types	
 			 * (can't use validateFormals 'cause it checks type for pair Expression - Formal)
 			 * */
@@ -86,12 +105,15 @@ class FeaturesTable
 
 				/*	redefined method param does not match original param's type	*/
 				if(!mParam.getTypeDecl().equals(ancestorParam.getTypeDecl()))
+				{
 					SemantErrorsManager.getInstance()
 					.semantError(SemantState.getInstance().getCurrentClass(),
 							"In redefined method "+m.getName().getString()
 							+ ", parameter type "+mParam.getTypeDecl().getString()
 							+ " is different from original type "
 							+ ancestorParam.getTypeDecl().getString());	
+					return;
+				}
 			}
 
 			/*	If method m has more or less parameters than his ancestor's method	*/
