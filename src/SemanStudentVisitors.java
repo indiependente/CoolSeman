@@ -458,7 +458,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(object obj) 
 			{
-				return obj.set_type((AbstractSymbol) semant_state.getScopeManager().lookup(obj.getName()));	
+				Class_ type = (Class_) semant_state.getScopeManager().lookup(obj.getName());
+				return obj.set_type(type.getName());	
 			}
 	
 		});
