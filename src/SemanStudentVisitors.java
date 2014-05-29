@@ -456,6 +456,26 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
+		selector.register(int_const.class, new IAction<int_const>()
+		{
+			@Override
+			public Object action(int_const obj) 
+			{
+				return obj.set_type(TreeConstants.Int);	
+			}
+	
+		});
+		
+		selector.register(bool_const.class, new IAction<bool_const>()
+		{
+			@Override
+			public Object action(bool_const obj) 
+			{
+				return obj.set_type(TreeConstants.Bool);	
+			}
+	
+		});
+		
 		selector.register(isvoid.class, new IAction<isvoid>()
 		{
 			@Override
