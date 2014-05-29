@@ -289,7 +289,7 @@ class FeaturesVisitor extends DefaultVisitor
 		Class_ cls = SemantState.getInstance().getCurrentClass();
 		cls.getFeaturesTable().registerAttr(attr);
 		/*	TEST	*/
-		System.out.println(attr.name.str + ": " + cls.getFeaturesTable().isAttributeRegistered(attr.name));
+		System.out.println(cls.getName().getString() + ": "+ attr.name.str + ": " + cls.getFeaturesTable().isAttributeRegistered(attr.name));
 		/*	END TEST	*/
 		return null;
 	}
@@ -299,7 +299,7 @@ class FeaturesVisitor extends DefaultVisitor
 		Class_ cls = SemantState.getInstance().getCurrentClass();
 		cls.getFeaturesTable().registerMethod(meth);
 		/*	TEST	*/
-		System.out.println(meth.name.str + ": " + cls.getFeaturesTable().isMethodRegistered(meth.name));
+		System.out.println(cls.getName().getString() + ": "+ meth.name.str + ": " + cls.getFeaturesTable().isMethodRegistered(meth.name));
 		/*	END TEST	*/
 		return null;
 	}
