@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 
@@ -27,6 +28,14 @@ class FeaturesTable
 	{
 		this.owner = c;
 		featuresList = new HashMap< AbstractSymbol , Feature >();
+	}
+	
+	public HashMap<AbstractSymbol, Feature> getFeaturesList() {
+		return featuresList;
+	}
+
+	public Class_ getOwner() {
+		return owner;
 	}
 	
 	/**
@@ -282,7 +291,74 @@ class FeaturesTable
 				
 		return validateActualsFormals(eForm, eAct);
 	}
+	
+	/**
+	 * Creates as many scopes as the sym's ancestor, from Object to sym's father.
+	 * Adds the features for every ancestor to his scope.
+	 * Creates the sym's scope.
+	 * Adds his features.
+	 * @param sym Class name
+	 * @return The number of scopes pushed in the SymbolTable's stack.
+	 */
+	public int loadClassScope(AbstractSymbol sym)
+	{
+		ClassTable cTbl = ClassTable.getInstance();
+		ArrayList<AbstractSymbol> ancestors = cTbl.getParents(sym);
+		
+		int numLevels = 0;
+		SymbolTable symTab = SemantState.getInstance().getScopeManager();
+		/*	Push the scope of sym's ancestors	*/
+		for (int i = ancestors.size()-1; i >= 0; i++)
+		{
+			numLevels++;
+			addClassFeaturesToLocalScope(ancestors.get(i), cTbl, symTab);
+		}
+		
+		/*	Now it's my turn :D	*/
+		symTab.enterScope();
+		numLevels++;
+		addClassFeaturesToLocalScope(sym, cTbl, symTab);
+		
+		return numLevels;
+	}
 
+	/**
+	 * @param cTbl
+	 * @param ancestors
+	 * @param symTab
+	 * @param i
+	 */
+	private void addClassFeaturesToLocalScope(AbstractSymbol sym, ClassTable cTbl, SymbolTable symTab) {
+		symTab.enterScope();
+		Class_ ancClazz = cTbl.lookup(sym);
+		for (Feature f : ancClazz.getFeaturesTable().getFeaturesList().values())
+		{
+			Class_ featureClazz = cTbl.lookup(f.getReturnType());
+			symTab.addId(f.getFeatureName(), featureClazz);
+		}
+	}
+	
+	/**
+	 * Creates the new scope for the method.
+	 * Loads the formals' return type classes to the scope.
+	 * @param sym Method name
+	 */
+	public void loadMethodScope(AbstractSymbol sym)
+	{
+		method meth = this.lookupMethod(sym);
+		if (meth == null) return; // it should never be null
+
+		SymbolTable symTab = SemantState.getInstance().getScopeManager();
+		Enumeration formals = meth.getFormals().getElements();
+		symTab.enterScope();
+		for (Formal f = (Formal)formals.nextElement(); formals.hasMoreElements(); )
+		{
+			Class_ classOfThisFormal = ClassTable.getInstance().lookup(f.getTypeDecl());
+			symTab.addId(f.getName(), classOfThisFormal);
+		}
+
+	}
+	
 	/**
 	 * Takes two enumerations parameter list and compare their types.
 	 * @param eForm	List of formals params
