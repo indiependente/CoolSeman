@@ -441,6 +441,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 	protected ExpressionTypeSelector selector;
 	protected SemantState semant_state = SemantState.getInstance();
+	protected SemantErrorsManager semant_errors = SemantErrorsManager.getInstance();
 	
 	public TypeCheckerVisitor()
 	{
@@ -486,6 +487,27 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
+		selector.register(string_const.class, new IAction<string_const>()
+		{
+			@Override
+			public Object action(string_const obj) 
+			{
+				return obj.set_type(TreeConstants.Str);	
+			}
+	
+		});
+		
+		selector.register(comp.class, new IAction<comp>()
+		{
+			@Override
+			public Object action(comp obj) 
+			{
+				return obj.set_type(TreeConstants.Str);	
+			}
+	
+		});
+		
+		
 		selector.register(new_.class, new IAction<new_>()
 		{
 			@Override
@@ -497,6 +519,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 					TypeCheckerHelper.validateType(type);
 				} 
 				catch (SemanticException e) {
+					semant_errors.semantError(obj, "'new' used with undefined class %s", type);
 				}
 				return obj.set_type(type);	
 			}

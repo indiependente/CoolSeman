@@ -33,7 +33,7 @@ class SemantErrorsManager
     *
     * */
    public PrintStream semantError(Class_ c) {
-   	return semantError(c.getFilename(), c.getName(),  c);
+   	return semantError(c.getFilename(),  c);
    }
    
    /** Prints line number and file name of the given class,
@@ -47,7 +47,7 @@ class SemantErrorsManager
    *
    * */
   public PrintStream semantError(Class_ c, String msg) {
-	   PrintStream stream = semantError(c.getFilename(), c.getName(),  c);
+	   PrintStream stream = semantError(c.getFilename(),  c);
 	   stream.println(msg);
 	   return stream;
   }
@@ -64,10 +64,27 @@ class SemantErrorsManager
    *
    * */
   public PrintStream semantError(Class_ c, String msg, Object... args) {
-	   PrintStream stream = semantError(c.getFilename(), c.getName(),  c);
+	   PrintStream stream = semantError(c.getFilename(),  c);
 	   stream.println(String.format(msg, args));
 	   return stream;
   }
+  
+  /** Prints line number and file name of the given class,
+   * prints the custom message, formatting it with args
+   * Also increments semantic error count.
+   *
+   * @param c the class
+   * @param msg the message to be formatted and printed
+   * @param args the values to be shown
+   * @return a print stream to which the rest of the error message is
+   * to be printed.
+   *
+   * */
+  public PrintStream semantError(TreeNode node, String msg, Object... args) {
+	   PrintStream stream = semantError(SemantState.getInstance().getCurrentClass().getFilename(), node);
+	   stream.println(String.format(msg, args));
+	   return stream;
+ }
 
    /** Prints the file name and the line number of the given tree node.
     *
@@ -79,7 +96,7 @@ class SemantErrorsManager
     * to be printed.
     *
     * */
-   public PrintStream semantError(AbstractSymbol filename, AbstractSymbol class_name, TreeNode t) {
+   public PrintStream semantError(AbstractSymbol filename, TreeNode t) {
    	errorStream.print(filename + ":" + t.getLineNumber() + ": ");
    	return semantError();
    }
