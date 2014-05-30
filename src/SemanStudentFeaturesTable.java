@@ -333,9 +333,10 @@ class FeaturesTable
 		Class_ ancClazz = cTbl.lookup(sym);
 		for (Feature f : ancClazz.getFeaturesTable().getFeaturesList().values())
 		{
-			Class_ featureClazz = cTbl.lookup(f.getReturnType());
-			if (featureClazz == null)
-				System.out.println("shit"); //this needs to be fixed
+			
+			System.out.println("Return type: "+TypeCheckerHelper.inferSelfType(f.getReturnType()));
+			Class_ featureClazz = cTbl.lookup(TypeCheckerHelper.inferSelfType(f.getReturnType()));
+			
 			symTab.addId(f.getFeatureName(), featureClazz);
 		}
 	}
@@ -353,12 +354,14 @@ class FeaturesTable
 		SymbolTable symTab = SemantState.getInstance().getScopeManager();
 		Enumeration formals = meth.getFormals().getElements();
 		symTab.enterScope();
-		for (Formal f = (Formal)formals.nextElement(); formals.hasMoreElements(); )
+		if (formals.hasMoreElements())
 		{
-			Class_ classOfThisFormal = ClassTable.getInstance().lookup(f.getTypeDecl());
-			symTab.addId(f.getName(), classOfThisFormal);
+			for (Formal f = (Formal)formals.nextElement(); formals.hasMoreElements(); )
+			{
+				Class_ classOfThisFormal = ClassTable.getInstance().lookup(f.getTypeDecl());
+				symTab.addId(f.getName(), classOfThisFormal);
+			}
 		}
-
 	}
 	
 	/**

@@ -472,7 +472,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPostOrder(Class_ cls) {
-		
+		int numScopes = cls.getFeaturesTable().loadClassScope(cls.getName());
+		System.out.println(" PostOrder #SCOPES: "+numScopes);
+		System.out.println("Class_ Symbol Table PostOrder: \n"+SemantState.getInstance().getScopeManager());
 		return null;
 	}
 
@@ -524,7 +526,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPreOrder(method itm) {
 		SemantState.getInstance().getCurrentClass().getFeaturesTable().loadMethodScope(itm.getName());
-		System.out.println("Symbol Table: "+SemantState.getInstance().getScopeManager());
+		System.out.println("method Symbol Table PreOrder: \n"+SemantState.getInstance().getScopeManager());
 		return null;
 	}
 
@@ -549,7 +551,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPreOrder(Class_ cls) {
 		int numScopes = cls.getFeaturesTable().loadClassScope(cls.getName());
-		System.out.println("#SCOPES: "+numScopes);
+		System.out.println(" PreOrder #SCOPES: "+numScopes);
+		System.out.println("Class_ Symbol Table PreOrder: \n"+SemantState.getInstance().getScopeManager());
 		return null;
 	}
 
