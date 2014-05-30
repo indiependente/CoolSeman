@@ -523,7 +523,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPreOrder(method itm) {
-		// TODO Auto-generated method stub
+		SemantState.getInstance().getCurrentClass().getFeaturesTable().loadMethodScope(itm.getName());
+		System.out.println("Symbol Table: "+SemantState.getInstance().getScopeManager());
 		return null;
 	}
 
@@ -547,7 +548,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPreOrder(Class_ cls) {
-		// TODO Auto-generated method stub
+		int numScopes = cls.getFeaturesTable().loadClassScope(cls.getName());
+		System.out.println("#SCOPES: "+numScopes);
 		return null;
 	}
 

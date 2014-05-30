@@ -293,7 +293,7 @@ class FeaturesTable
 	}
 	
 	/**
-	 * Creates as many scopes as the sym's ancestor, from Object to sym's father.
+	 * Creates as many scopes as the sym's ancestors are, from Object to sym's father.
 	 * Adds the features for every ancestor to his scope.
 	 * Creates the sym's scope.
 	 * Adds his features.
@@ -308,7 +308,7 @@ class FeaturesTable
 		int numLevels = 0;
 		SymbolTable symTab = SemantState.getInstance().getScopeManager();
 		/*	Push the scope of sym's ancestors	*/
-		for (int i = ancestors.size()-1; i >= 0; i++)
+		for (int i = ancestors.size()-1; i >= 0; i--)
 		{
 			numLevels++;
 			addClassFeaturesToLocalScope(ancestors.get(i), cTbl, symTab);
@@ -334,6 +334,8 @@ class FeaturesTable
 		for (Feature f : ancClazz.getFeaturesTable().getFeaturesList().values())
 		{
 			Class_ featureClazz = cTbl.lookup(f.getReturnType());
+			if (featureClazz == null)
+				System.out.println("shit"); //this needs to be fixed
 			symTab.addId(f.getFeatureName(), featureClazz);
 		}
 	}
