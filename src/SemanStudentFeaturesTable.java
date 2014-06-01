@@ -3,6 +3,18 @@ import java.util.Enumeration;
 import java.util.HashMap;
 
 /**
+ * GIVE ME YOUR EYES:
+ * 
+ * I SEE SOME PROBLEM WITH ACTUAL DESIGN OF THIS CLASS, MANY METHODS MAY BE CALLED
+ * FROM ANOTHER CLASS, HENCE THEY MUST BE STATIC OR YOU SHOULD PROVIDE STATIC METHOD 
+ * FOR GENERAL PURPOSE CALLS, FOR INSTANCE THE VALIDATION OF EITHER A STATIC OR A SIMPLE
+ * DISPATCH MAY BE ASKED FROM A DIFFERENT CLASS. ANYWAY IT'S EASY TO FIX THIS DESIGN ISSUE.
+ * 
+ *  MOREOVER I WONDER WHY I AM WRITING THIS MESSAGE IN ENGLISH
+ * 
+ */
+
+/**
  * 	This class is the implementation of the Objects, Methods Table.
  * 	It stores the attributes and the methods that belong to a Class.
  * 	Methods and attributes are mapped into an HashMap < AbstractSymbol , Feature >.
@@ -354,6 +366,8 @@ class FeaturesTable
 		SymbolTable symTab = SemantState.getInstance().getScopeManager();
 		Enumeration formals = meth.getFormals().getElements();
 		symTab.enterScope();
+		
+		/*
 		if (formals.hasMoreElements())
 		{
 			for (Formal f = (Formal)formals.nextElement(); formals.hasMoreElements(); )
@@ -361,6 +375,14 @@ class FeaturesTable
 				Class_ classOfThisFormal = ClassTable.getInstance().lookup(f.getTypeDecl());
 				symTab.addId(f.getName(), classOfThisFormal);
 			}
+		}
+		*/
+		
+		while (formals.hasMoreElements())
+		{
+			Formal f = (Formal) formals.nextElement();
+			Class_ classOfThisFormal = ClassTable.getInstance().lookup(f.getTypeDecl());
+			symTab.addId(f.getName(), classOfThisFormal);
 		}
 	}
 	
