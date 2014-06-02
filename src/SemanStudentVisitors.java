@@ -401,7 +401,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(comp obj) 
 			{
-				AbstractSymbol child_type = ((Expression) obj.getData("child")).get_type();
+				AbstractSymbol child_type = ((AbstractSymbol) obj.getData("child"));
 				try {
 					TypeCheckerHelper.validateType(child_type);
 					TypeCheckerHelper.typeMatch(child_type, TreeConstants.Bool);
@@ -439,8 +439,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(leq obj) 
 			{
-				AbstractSymbol left_type = ((Expression) obj.getData("left")).get_type();
-				AbstractSymbol right_type = ((Expression) obj.getData("right")).get_type();
+				AbstractSymbol left_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_type = (AbstractSymbol) obj.getData("right");
 				
 				try {
 					TypeCheckerHelper.validateType(left_type);
