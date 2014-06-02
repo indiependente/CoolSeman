@@ -1234,8 +1234,8 @@ class typcase extends Expression {
 		 */
 		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
-		Object ret_cases = cases.accept(visitor);
-		// decorare
+		Object ret_cases = cases.accept(visitor); // this is the least upper bound
+		decorate("lub", ret_cases);
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}

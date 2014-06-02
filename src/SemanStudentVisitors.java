@@ -689,7 +689,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(typcase obj) 
 			{
-				return null;
+				return obj.set_type((AbstractSymbol) obj.getData("lub"));
 			}
 	
 		});
