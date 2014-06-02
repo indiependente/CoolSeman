@@ -472,7 +472,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(neg obj) 
 			{
-				return null;
+				AbstractSymbol child_type = (AbstractSymbol) obj.getData("child");
+				try
+				{
+					TypeCheckerHelper.validateType(child_type);
+					TypeCheckerHelper.typeMatch(child_type, TreeConstants.Int);
+				}
+				catch (SemanticException ex)
+				{
+					
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
