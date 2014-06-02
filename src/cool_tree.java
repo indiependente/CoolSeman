@@ -277,14 +277,22 @@ class Cases extends ListNode {
 	public Object accept(ITreeVisitor visitor) {
 		visitor.onVisitPreOrder(this);
 		AbstractSymbol[] type_list = new AbstractSymbol[getLength()];
-		int i=0;
-		
+		ArrayList<AbstractSymbol> branches = new ArrayList<AbstractSymbol>();
 		for (Enumeration e = getElements(); e.hasMoreElements(); )
 		{
 			Case itm = (Case) e.nextElement();
-			type_list[i]=(AbstractSymbol)itm.accept(visitor);
-			i++;
+			AbstractSymbol toAdd = (AbstractSymbol)itm.accept(visitor);
+			if(branches.contains(toAdd))
+			{
+				SemantErrorsManager.getInstance().semantError(this, "Duplicate branch %s in case statement.", toAdd);
+			}				
+			else
+			{
+				branches.add(toAdd);
+			}			
 		}
+		
+		branches.toArray(type_list);
 		
 		decorate("type_list", type_list);
 		/*
