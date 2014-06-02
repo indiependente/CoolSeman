@@ -346,7 +346,7 @@ class ClassTable {
 	{
 		for (AbstractSymbol sym : table.keySet())
 		{
-			if (sym.getString().equals("Object"))
+			if (sym.getString().equals("Object") || sym.getString().equals("_no_type"))
 				continue;
 			Class_ cls = table.get(sym);
 			AbstractSymbol parent = cls.getParent();
