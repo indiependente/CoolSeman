@@ -534,8 +534,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(divide obj) 
 			{
-				 AbstractSymbol left_child = ((Expression) obj.getData("left")).get_type();
-				 AbstractSymbol right_child = ((Expression) obj.getData("right")).get_type();
+				 AbstractSymbol left_child = (AbstractSymbol) obj.getData("left");
+				 AbstractSymbol right_child = (AbstractSymbol) obj.getData("right");
 				 
 				 try {
 					TypeCheckerHelper.validateType(left_child);
@@ -631,7 +631,16 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(block obj) 
 			{
-				return null;
+				AbstractSymbol ret_block=(AbstractSymbol)obj.getData("ret_block");
+				try {
+					TypeCheckerHelper.validateType(ret_block);
+				} catch (SemanticException e) {
+					/**
+					 * Nothing to do.
+					 */
+				}
+				
+				return obj.set_type(ret_block);
 			}
 	
 		});
@@ -653,7 +662,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(loop obj) 
 			{
-				return null;
+				AbstractSymbol pred_type = (AbstractSymbol)obj.getData("pred");
+				
+				try {
+					TypeCheckerHelper.validateType(pred_type);
+					TypeCheckerHelper.typeMatch(pred_type, TreeConstants.Bool);
+				} catch (SemanticException e) {
+					 semant_errors.semantError(obj,"Loop condition does not have type Bool.");
+				}
+				
+				return obj.set_type(TreeConstants.Object_);
+				
 			}
 	
 		});
