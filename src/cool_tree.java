@@ -345,7 +345,7 @@ class programc extends Program {
 			visitor.onVisitEnd();
 		}
 
-		SemantErrorsManager.getInstance().validate();
+		SemantErrorsManager.getInstance().validate(true);
 		
 	}
 
@@ -1041,6 +1041,13 @@ class cond extends Expression {
 		return new cond(lineNumber, (Expression)pred.copy(), (Expression)then_exp.copy(), (Expression)else_exp.copy());
 	}
 	
+	
+	
+	public Expression getPred(){
+		return pred;
+	}
+	
+	
 	public void dump(PrintStream out, int n) {
 		out.print(Utilities.pad(n) + "cond\n");
 		pred.dump(out, n+2);
@@ -1069,14 +1076,16 @@ class cond extends Expression {
 	public Object accept(ITreeVisitor visitor) {
 		visitor.onVisitPreOrder(this);
 		Object ret_pred = visitor.onVisitPostOrder(pred);
-		Object ret_then_exp = visitor.onVisitPostOrder(then_exp);
-		Object ret_else_exp = visitor.onVisitPostOrder(else_exp);
-
+		Object ret_then_exp = then_exp.accept(visitor);
+		Object ret_else_exp = else_exp.accept(visitor);
+		
 		/*
 		 * valutare che ret_pred sia di sottotipo di Bool oppure metterlo Object
 		 * valutare le expr, calcolarne il lub ed impostare il tipo di ritorno
 		 */
-
+		decorate("ret_pred", ret_pred);
+		decorate("ret_then_exp", ret_then_exp);
+		decorate("ret_else_exp", ret_else_exp);
 		visitor.onVisitPostOrder(this);
 
 		return get_type();
