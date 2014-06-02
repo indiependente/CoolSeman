@@ -483,7 +483,19 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(divide obj) 
 			{
-				return null;
+				 AbstractSymbol left_child = ((Expression) obj.getData("left")).get_type();
+				 AbstractSymbol right_child = ((Expression) obj.getData("right")).get_type();
+				 
+				 try {
+					TypeCheckerHelper.validateType(left_child);
+					TypeCheckerHelper.typeMatch(left_child, TreeConstants.Int);
+					
+					TypeCheckerHelper.validateType(right_child);
+					TypeCheckerHelper.typeMatch(right_child, TreeConstants.Int);
+				 } catch (SemanticException e) {
+					 semant_errors.semantError(obj,"non-Int arguments: %s / %s",left_child,right_child);
+				}
+				 return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
