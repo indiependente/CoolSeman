@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
+import org.jgrapht.generate.RingGraphGenerator;
+
 
 /**
  * This class implements the decorator pattern
@@ -675,7 +677,35 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(cond obj) 
 			{
-				return null;
+				AbstractSymbol ret_pred = (AbstractSymbol) obj.getData("ret_pred");
+				AbstractSymbol ret_then_exp = (AbstractSymbol) obj.getData("ret_then_exp");
+				AbstractSymbol ret_else_exp = (AbstractSymbol) obj.getData("ret_else_exp");
+				
+				if(!ClassTable.getInstance().isSubClass(ret_pred,TreeConstants.Bool))
+					{
+						obj.getPred().set_type(TreeConstants.Object_);
+					}
+				
+				try 
+				{
+					TypeCheckerHelper.validateType(ret_then_exp);
+				} 
+				catch (SemanticException e) 
+				{
+					semant_errors.semantError(obj, "Undeclared identifier %s", ret_then_exp);
+				}
+				
+				try 
+				{
+					TypeCheckerHelper.validateType(ret_else_exp);
+				} 
+				catch (SemanticException e) 
+				{
+					semant_errors.semantError(obj, "Undeclared identifier %s", ret_else_exp);
+				}
+				
+				AbstractSymbol lub = ClassTable.getInstance().leastUpperBound(ret_then_exp,ret_else_exp);
+				return obj.set_type(lub);
 			}
 	
 		});
