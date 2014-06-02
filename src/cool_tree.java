@@ -897,17 +897,20 @@ class static_dispatch extends Expression {
 		/*
 		 * expr@TYPE.method(params)
 		 * valutare il tipo di expr, tradurre self in SELF_TYPE
-		 * fare il lookup di type_name, ma non deve essere SELF_TYPE -> farlo diventare Object [CHIEDERE A GENCOS]
+		 * fare il lookup di type_name, ma non deve essere SELF_TYPE -> farlo diventare Object
 		 * vedere se expr e' sottotipo di TYPE
-		 * vedere se name �� registrato per TYPE
+		 * vedere se name è registrato per TYPE
 		 * validare actuals
 		 * vedere se per ogni param matcha con la dichiarazione del metodo
 		 * assegnare il tipo al nodo
 		 * 
 		 */
 		visitor.onVisitPreOrder(this);
-		expr.accept(visitor);
+		AbstractSymbol expr_type = (AbstractSymbol)expr.accept(visitor);
+		
 		actual.accept(visitor);
+		decorate("expr_type", expr_type);
+		decorate("typeid_type", type_name);
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
@@ -1279,7 +1282,8 @@ class block extends Expression {
 		visitor.onVisitPreOrder(this);
 		Object ret_block = body.accept(visitor);
 		decorate("ret_block", ret_block);
-		return visitor.onVisitPostOrder(this);
+		visitor.onVisitPostOrder(this);
+		return get_type();
 	}
 
 

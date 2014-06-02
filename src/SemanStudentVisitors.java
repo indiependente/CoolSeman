@@ -751,7 +751,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				{
 					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
-				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj);
+				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj.getName());
 				if (meth == null)
 				{
 					SemantErrorsManager.getInstance().semantError(obj, "Dispatch to undefined method %s.", obj.getName());
@@ -768,7 +768,48 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(static_dispatch obj) 
 			{
-				return null;
+				ClassTable cTbl = ClassTable.getInstance();
+				AbstractSymbol mySym = (AbstractSymbol)obj.getData("expr_type");
+				AbstractSymbol typeSym = (AbstractSymbol)obj.getData("typeid_type");
+				
+				if (typeSym.equals("SELF_TYPE"))
+				{
+					SemantErrorsManager.getInstance().semantError(obj, "Static dispatch to SELF_TYPE.");
+					return obj.set_type(TreeConstants.Object_);	// set static dispatch type to object
+				}
+				
+				Class_ myCls = cTbl.lookup(mySym); // the expr class
+				Class_ typeCls = cTbl.lookup(typeSym); // the expr@type class
+				
+				// it should never enter in this if statement
+				if (myCls == null)	// if the dispatch caller class is not defined
+				{
+					SemantErrorsManager.getInstance().semantError(obj, "Static dispatch to undefined class %s.", typeSym);
+					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+				}
+				
+				if (!ClassTable.getInstance().isSubClass(myCls, typeCls))
+				{
+					SemantErrorsManager.getInstance().semantError(obj,
+							"Expression type %s does not conform to declared static dispatch type %s.",
+							mySym, typeSym);
+				}
+				
+				// this validation, validates the actuals params too
+				boolean isValid = FeaturesTable.validateDispatch(typeSym, obj);
+				if (!isValid)
+				{
+					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+				}
+				
+				method meth = FeaturesTable.lookupMethod(typeSym, obj.getName());
+				if (meth == null)
+				{
+					SemantErrorsManager.getInstance().semantError(obj, "Static dispatch to undefined method %s.", obj.getName());
+				}
+				
+				return obj.set_type(meth.getReturnType());
+
 			}
 	
 		});

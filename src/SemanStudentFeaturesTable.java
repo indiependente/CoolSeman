@@ -3,18 +3,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 
 /**
- * GIVE ME YOUR EYES:
- * 
- * I SEE SOME PROBLEM WITH ACTUAL DESIGN OF THIS CLASS, MANY METHODS MAY BE CALLED
- * FROM ANOTHER CLASS, HENCE THEY MUST BE STATIC OR YOU SHOULD PROVIDE STATIC METHOD 
- * FOR GENERAL PURPOSE CALLS, FOR INSTANCE THE VALIDATION OF EITHER A STATIC OR A SIMPLE
- * DISPATCH MAY BE ASKED FROM A DIFFERENT CLASS. ANYWAY IT'S EASY TO FIX THIS DESIGN ISSUE.
- * 
- *  MOREOVER I WONDER WHY I AM WRITING THIS MESSAGE IN ENGLISH
- * 
- */
-
-/**
  * 	This class is the implementation of the Objects, Methods Table.
  * 	It stores the attributes and the methods that belong to a Class.
  * 	Methods and attributes are mapped into an HashMap < AbstractSymbol , Feature >.
@@ -420,11 +408,12 @@ class FeaturesTable
 	/**
 	 * Looks for the method d.name in the sym type
 	 * @param sym The class to look in
-	 * @param d	The dispatch to look for
+	 * @param methName	The dispatch to look for
 	 * @return	The method node in the AST
 	 */
-	public static method lookupMethod(AbstractSymbol sym, dispatch d)
+	public static method lookupMethod(AbstractSymbol sym, AbstractSymbol methName)
 	{
-		return ClassTable.getInstance().lookup(sym).getFeaturesTable().lookupMethod(d.getName());
+		return ClassTable.getInstance().lookup(sym).getFeaturesTable().lookupMethod(methName);
 	}
+	
 }
