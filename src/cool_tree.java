@@ -828,15 +828,12 @@ class assign extends Expression {
 
 	@Override
 	public Object accept(ITreeVisitor visitor) {
-		/*
-		 * processare expr
-		 * verificare che name sia presente nello scope
-		 * verificare che non sia self
-		 * veriicare che il tipo di name possa ospitare type(expr) [modulare]
-		 */
+
 		visitor.onVisitPreOrder(this);
+		decorate("name", name);
+		decorate("expr", expr);
 		expr.accept(visitor);
-		visitor.onVisitPostOrder(this); // fare set type
+		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
 
@@ -1359,14 +1356,6 @@ class let extends Expression {
 	
 	@Override
 	public Object accept(ITreeVisitor visitor) {
-		/**
-		 * identifier non deve essere self
-		 * valutare che type_decl sia un tipo valido
-		 * 
-		 * valutare che il lub di init sia valido per type_decl
-		 * valutare il body e calcolarne il tipo di ritorno
-		 * 
-		 */
 
 		visitor.onVisitPreOrder(this);
 		
