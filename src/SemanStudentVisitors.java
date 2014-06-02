@@ -878,7 +878,35 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(assign obj) 
 			{
-				return null;
+				AbstractSymbol varName = (AbstractSymbol) obj.getData("name");
+				Expression expr = (Expression) obj.getData("expr");
+				
+				AbstractSymbol varType = (AbstractSymbol) semant_state.getScopeManager().lookup(varName);
+				AbstractSymbol exprType = (AbstractSymbol) semant_state.getScopeManager().lookup(expr.get_type());
+				
+				//check if the identifier is declared
+				if( varType == null)
+				{
+					semant_errors.semantError(obj, "Assignment to undeclared variable %s.", varName);
+				}
+				
+				//check the name of the identifier
+				if(varName.toString().equals("self"))
+				{			
+					semant_errors.semantError(obj, "Type " + exprType +
+							" of assigned expression does not conform to declared type " +
+							   varType +" of identifier "+ varName +".");
+	
+				}
+				
+				//check if the expression can be assigned to the variable
+				if(!ClassTable.getInstance().isSubClass(exprType, varType))
+				{
+					semant_errors.semantError(obj," Type "+ exprType + " of assigned expression does not conform to declared type "+
+									varType +" of identifier "+ varName +".");
+				}
+				
+				return obj.set_type(varType);
 			}
 	
 		});
