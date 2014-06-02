@@ -60,7 +60,7 @@ class FeaturesTable
 		if (featuresList.containsKey(a.getFeatureName()))
 		{
 			SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(), "Attribute %s is multiply defined.", 
+			.semantError(a, "Attribute %s is multiply defined.", 
 					a.getFeatureName());
 			return;
 		}
@@ -69,7 +69,7 @@ class FeaturesTable
 		if (lookupAttr(a.getFeatureName()) != null)
 		{
 			SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(), "Attribute %s is an attribute of an inherited class.", 
+			.semantError(a, "Attribute %s is an attribute of an inherited class.", 
 					a.getFeatureName());
 			return;
 		}
@@ -78,7 +78,7 @@ class FeaturesTable
 			TypeCheckerHelper.validateType(TypeCheckerHelper.inferSelfType(a.getReturnType()));
 		} catch (SemanticException e) {
 			SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(), "Class %s of attribute %s is undefined.", 
+			.semantError(a, "Class %s of attribute %s is undefined.", 
 					a.getReturnType(), a.getFeatureName());
 			return;
 		}
@@ -110,7 +110,7 @@ class FeaturesTable
 			if (!ancestorMeth.getReturnType().getString().equals(m.getReturnType().getString()))
 			{	
 				SemantErrorsManager.getInstance()
-				.semantError(SemantState.getInstance().getCurrentClass(),
+				.semantError(m,
 						"In redefined method "+ m.getName().getString() 
 						+ ", return type "+ m.getReturnType().getString()
 						+ " is different from original return type "+ ancestorMeth.getReturnType().getString() +" .");
@@ -125,7 +125,7 @@ class FeaturesTable
 			TypeCheckerHelper.validateType(TypeCheckerHelper.inferSelfType(m.getReturnType()));
 		} catch (SemanticException e) {
 			SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(),
+			.semantError(m,
 					"Undefined return type %s in method %s.",
 					m.getReturnType(), m.getName());
 			return;
@@ -140,7 +140,7 @@ class FeaturesTable
 			if (as.getString().equals("SELF_TYPE"))
 			{
 				SemantErrorsManager.getInstance()
-				.semantError(SemantState.getInstance().getCurrentClass(),
+				.semantError(m,
 						"Formal parameter %s cannot have type SELF_TYPE.",
 						f.getName(), f.getTypeDecl());
 				return;
@@ -180,7 +180,7 @@ class FeaturesTable
 			if(!mParam.getTypeDecl().equals(ancestorParam.getTypeDecl()))
 			{
 				SemantErrorsManager.getInstance()
-				.semantError(SemantState.getInstance().getCurrentClass(),
+				.semantError(m,
 						"In redefined method "+m.getName().getString()
 						+ ", parameter type "+mParam.getTypeDecl().getString()
 						+ " is different from original type "
@@ -192,7 +192,7 @@ class FeaturesTable
 		/*	If method m has more or less parameters than his ancestor's method	*/
 		if(mForm.hasMoreElements() || ancestorMethForm.hasMoreElements() )
 		{	SemantErrorsManager.getInstance()
-			.semantError(SemantState.getInstance().getCurrentClass(),
+			.semantError(m,
 					"Incompatible number of formal parameters in redefined method "+
 							m.getName().getString() + ".");
 			return false;

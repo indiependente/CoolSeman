@@ -403,7 +403,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(comp obj) 
 			{
-				AbstractSymbol child_type = ((Expression) obj.getData("child")).get_type();
+				AbstractSymbol child_type = ((AbstractSymbol) obj.getData("child"));
 				try {
 					TypeCheckerHelper.validateType(child_type);
 					TypeCheckerHelper.typeMatch(child_type, TreeConstants.Bool);
@@ -441,8 +441,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(leq obj) 
 			{
-				AbstractSymbol left_type = ((Expression) obj.getData("left")).get_type();
-				AbstractSymbol right_type =((Expression) obj.getData("right")).get_type();
+				AbstractSymbol left_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_type = (AbstractSymbol) obj.getData("right");
 				
 				try {
 					TypeCheckerHelper.validateType(left_type);
@@ -450,10 +450,10 @@ class TypeCheckerVisitor implements ITreeVisitor
 					TypeCheckerHelper.typeMatch(left_type, TreeConstants.Int);
 					TypeCheckerHelper.typeMatch(right_type, TreeConstants.Int);
 				} catch (SemanticException e) {
-					semant_errors.semantError(obj, "non-Int arguments: %s < %s", left_type, right_type);	
+					semant_errors.semantError(obj, "non-Int arguments: %s <= %s", left_type, right_type);	
 				}
 				
-				return  obj.set_type(TreeConstants.Int);
+				return  obj.set_type(TreeConstants.Bool);
 			}
 	
 		});
@@ -464,6 +464,34 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(eq obj) 
 			{
+				AbstractSymbol left_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_type = (AbstractSymbol) obj.getData("right");
+				
+				try
+				{
+					TypeCheckerHelper.validateType(left_type);
+					TypeCheckerHelper.validateType(right_type);
+					TypeCheckerHelper.typeMatchAny(left_type, TreeConstants.Int, 
+							TreeConstants.Bool, TreeConstants.Str);
+					TypeCheckerHelper.typeMatchAny(right_type, TreeConstants.Int,
+							TreeConstants.Bool, TreeConstants.Str);
+					TypeCheckerHelper.typeMatch(left_type, right_type);
+				}
+				catch (SemanticException e) {
+					semant_errors.semantError(obj, "Illegal comparison with a basic type");	
+				}
+				
+				return  obj.set_type(TreeConstants.Bool);
+			}
+	
+		});
+		
+		selector.register(no_expr.class, new IAction<no_expr>()
+		{
+
+			@Override
+			public Object action(no_expr obj) {
+				// TODO Auto-generated method stub
 				return null;
 			}
 	
@@ -475,7 +503,19 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(lt obj) 
 			{
-				return null;
+				AbstractSymbol left_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_type = (AbstractSymbol) obj.getData("right");
+				
+				try {
+					TypeCheckerHelper.validateType(left_type);
+					TypeCheckerHelper.validateType(right_type);
+					TypeCheckerHelper.typeMatch(left_type, TreeConstants.Int);
+					TypeCheckerHelper.typeMatch(right_type, TreeConstants.Int);
+				} catch (SemanticException e) {
+					semant_errors.semantError(obj, "non-Int arguments: %s < %s", left_type, right_type);	
+				}
+				
+				return  obj.set_type(TreeConstants.Bool);
 			}
 	
 		});
@@ -486,7 +526,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(neg obj) 
 			{
-				return null;
+				AbstractSymbol child_type = (AbstractSymbol) obj.getData("child");
+				try
+				{
+					TypeCheckerHelper.validateType(child_type);
+					TypeCheckerHelper.typeMatch(child_type, TreeConstants.Int);
+				}
+				catch (SemanticException ex)
+				{
+					semant_errors.semantError(obj, "Argument of '~' has type %s instead of Int.", child_type);	
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -497,7 +547,19 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(divide obj) 
 			{
-				return null;
+				 AbstractSymbol left_child = ((Expression) obj.getData("left")).get_type();
+				 AbstractSymbol right_child = ((Expression) obj.getData("right")).get_type();
+				 
+				 try {
+					TypeCheckerHelper.validateType(left_child);
+					TypeCheckerHelper.typeMatch(left_child, TreeConstants.Int);
+					
+					TypeCheckerHelper.validateType(right_child);
+					TypeCheckerHelper.typeMatch(right_child, TreeConstants.Int);
+				 } catch (SemanticException e) {
+					 semant_errors.semantError(obj,"non-Int arguments: %s / %s",left_child,right_child);
+				}
+				 return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -508,7 +570,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(mul obj) 
 			{
-				return null;
+				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
+				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				try{
+					TypeCheckerHelper.validateType(left_child_type);
+					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
+					TypeCheckerHelper.validateType(right_child_type);
+					TypeCheckerHelper.typeMatch(right_child_type, TreeConstants.Int);
+				}catch (SemanticException e){
+					semant_errors.semantError(obj, "non-Int arguments: %s * %s", left_child_type, right_child_type);	
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -519,7 +591,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(sub obj) 
 			{
-				return null;
+				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
+				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				try{
+					TypeCheckerHelper.validateType(left_child_type);
+					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
+					TypeCheckerHelper.validateType(right_child_type);
+					TypeCheckerHelper.typeMatch(right_child_type, TreeConstants.Int);
+				}catch (SemanticException e){
+					semant_errors.semantError(obj, "non-Int arguments: %s - %s", left_child_type, right_child_type);	
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -530,7 +612,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(plus obj) 
 			{
-				return null;
+				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
+				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				try{
+					TypeCheckerHelper.validateType(left_child_type);
+					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
+					TypeCheckerHelper.validateType(right_child_type);
+					TypeCheckerHelper.typeMatch(right_child_type, TreeConstants.Int);
+				}catch (SemanticException e){
+					semant_errors.semantError(obj, "non-Int arguments: %s + %s", left_child_type, right_child_type);	
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -585,9 +677,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(cond obj) 
 			{
-				AbstractSymbol ret_pred = ((Expression) obj.getData("ret_pred")).get_type();
-				AbstractSymbol ret_then_exp = ((Expression) obj.getData("ret_then_exp")).get_type();
-				AbstractSymbol ret_else_exp = ((Expression) obj.getData("ret_else_exp")).get_type();
+				AbstractSymbol ret_pred = (AbstractSymbol) obj.getData("ret_pred");
+				AbstractSymbol ret_then_exp = (AbstractSymbol) obj.getData("ret_then_exp");
+				AbstractSymbol ret_else_exp = (AbstractSymbol) obj.getData("ret_else_exp");
 				
 				if(!ClassTable.getInstance().isSubClass(ret_pred,TreeConstants.Bool))
 					{
