@@ -367,17 +367,6 @@ class FeaturesTable
 		Enumeration formals = meth.getFormals().getElements();
 		symTab.enterScope();
 		
-		/*
-		if (formals.hasMoreElements())
-		{
-			for (Formal f = (Formal)formals.nextElement(); formals.hasMoreElements(); )
-			{
-				Class_ classOfThisFormal = ClassTable.getInstance().lookup(f.getTypeDecl());
-				symTab.addId(f.getName(), classOfThisFormal);
-			}
-		}
-		*/
-		
 		while (formals.hasMoreElements())
 		{
 			Formal f = (Formal) formals.nextElement();

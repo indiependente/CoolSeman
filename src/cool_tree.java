@@ -340,6 +340,7 @@ class programc extends Program {
     	
 		for (ITreeVisitor visitor : visitors)
 		{
+			visitor.onVisitStart();
 			accept(visitor);
 			visitor.onVisitEnd();
 		}
@@ -397,6 +398,7 @@ class class_c extends Class_ {
 		parent = a2;
 		features = a3;
 		filename = a4;
+		ClassTable.getInstance().registerClass(this);
 		featuresTable = new FeaturesTable(this);
 	}
 	public TreeNode copy() {

@@ -37,7 +37,7 @@ class Semant {
 			Object result = parser.parse().value;
 			Program root = (Program) result;
 			
-			root.registerVisitor(new ClassesVisitor());
+			//root.registerVisitor(new ClassesVisitor());
             root.registerVisitor(new FeaturesVisitor());
 			root.registerVisitor(new TypeCheckerVisitor());
 		    

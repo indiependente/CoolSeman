@@ -65,6 +65,7 @@ interface ITreeVisitor {
 	Object onVisitPreOrder(Expression expr);
 	Object onVisitPreOrder(Expressions expressions);
 	
+	void onVisitStart();
 	void onVisitEnd();
 	
 }
@@ -249,12 +250,18 @@ class DefaultVisitor implements ITreeVisitor
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void onVisitStart() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 /**
  * this is the first visit executed on the AST
  * it collects every type declared
- *
+ * @deprecated
  */
 class ClassesVisitor extends DefaultVisitor 
 {
@@ -305,6 +312,15 @@ class FeaturesVisitor extends DefaultVisitor
 	@Override
 	public void onVisitEnd() 
 	{
+		SemantErrorsManager.getInstance().validate();
+	}
+	
+	@Override
+	public void onVisitStart()
+	{
+		ClassTable tbl = ClassTable.getInstance();
+		tbl.installBasicClasses();
+	    tbl.validate();
 		SemantErrorsManager.getInstance().validate();
 	}
 }
@@ -385,7 +401,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(comp obj) 
 			{
-				AbstractSymbol child_type = (AbstractSymbol) obj.getData("child");
+				AbstractSymbol child_type = ((Expression) obj.getData("child")).get_type();
 				try {
 					TypeCheckerHelper.validateType(child_type);
 					TypeCheckerHelper.typeMatch(child_type, TreeConstants.Bool);
@@ -419,13 +435,20 @@ class TypeCheckerVisitor implements ITreeVisitor
 		
 	}
 
+	@Override
+	public void onVisitStart()
+	{
+		
+	}
+	
+	
 	/**
 	 * this method analyses if a method node is semantically correct 
 	 */
-	public Object onVisitPostOrder(method itm) {
-		Object dynamic_return_type = itm.getData("dyn_return_type");
-		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) dynamic_return_type);
-		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(itm.getReturnType());
+	public Object onVisitPostOrder(method mth) {
+		Expression expr = (Expression) mth.getData("dyn_return_type");
+		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(expr.get_type());
+		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
 		try
 		{
 			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
@@ -444,7 +467,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 * it checks if attr node is semantically correct
 	 */
 	public Object onVisitPostOrder(attr itm) {
-		AbstractSymbol init_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) itm.getData("init_type"));
+		Expression expr = (Expression) itm.getData("init_type");
+		AbstractSymbol init_type_symbol = TypeCheckerHelper.inferSelfType(expr.get_type());
 		AbstractSymbol static_type_symbol = TypeCheckerHelper.inferSelfType(itm.getReturnType());
 		try
 		{
@@ -488,7 +512,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 * it checks if a case node is semantically correct
 	 */
 	public Object onVisitPostOrder(Case branch) {
-		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) branch.getData("branch_type"));
+		Expression expr = (Expression) branch.getData("branch_type");
+		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) expr.get_type());
 		AbstractSymbol static_type_symbol = TypeCheckerHelper.inferSelfType(branch.getReturnType());
 		try
 		{

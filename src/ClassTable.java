@@ -62,7 +62,7 @@ class ClassTable {
      * do anything useful; you will need to edit it to make if do what
      * you want.
      * */
-    private void installBasicClasses() {
+    public void installBasicClasses() {
 		AbstractSymbol filename 
 		    = AbstractTable.stringtable.addString("<basic class>");
 		
@@ -81,6 +81,8 @@ class ClassTable {
 		//                                 of class name
 		//        copy() : SELF_TYPE       returns a copy of the object
 	
+		System.out.println("sss");
+		
 		class_c Object_class = 
 		    new class_c(0, 
 			       TreeConstants.Object_, 
@@ -220,13 +222,15 @@ class ClassTable {
 			//Object deve essere registrato a mano perche' non ha parent
 			dag.addVertex(TreeConstants.Object_);
 			table.put(TreeConstants.Object_, Object_class);
+			
+			table.put(TreeConstants.No_type, null);
 	
-		
+			// no longer needed
 			//registerClass(TreeConstants.Object_, Object_class, TreeConstants.No_class);
-			registerClass(TreeConstants.IO, IO_class, TreeConstants.Object_);
-			registerClass(TreeConstants.Int, Int_class, TreeConstants.Object_);
-			registerClass(TreeConstants.Bool, Bool_class, TreeConstants.Object_);
-			registerClass(TreeConstants.Str, Str_class, TreeConstants.Object_);
+			//registerClass(TreeConstants.IO, IO_class, TreeConstants.Object_);
+			//registerClass(TreeConstants.Int, Int_class, TreeConstants.Object_);
+			//registerClass(TreeConstants.Bool, Bool_class, TreeConstants.Object_);
+			//registerClass(TreeConstants.Str, Str_class, TreeConstants.Object_);
 			
 		
 			
@@ -246,7 +250,8 @@ class ClassTable {
     		SemantErrorsManager.getInstance().semantError(impl, "Class %s was previously defined", cls);
     		return;
     	}
-    	
+    
+//    	System.out.println("registering " + cls);
     	table.put(cls, impl);
     	dag.addVertex(cls);
     
@@ -279,7 +284,7 @@ class ClassTable {
     
     private static ClassTable instance = null;
     
-    public static ClassTable getInstance()
+    public static synchronized ClassTable getInstance()
     {
     	if (instance == null)
     		instance = new ClassTable();
@@ -289,12 +294,11 @@ class ClassTable {
     private ClassTable() 
     {
     	
-		
 		/* fill this in */
 		table = new HashMap<AbstractSymbol, Class_>();
 		dag = new DefaultDirectedGraph<AbstractSymbol, DefaultEdge>(DefaultEdge.class);
 	
-		this.installBasicClasses();
+		
 	
     }
 
