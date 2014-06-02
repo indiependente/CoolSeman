@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
+import org.jgrapht.generate.RingGraphGenerator;
+
 
 /**
  * This class implements the decorator pattern
@@ -440,7 +442,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(leq obj) 
 			{
 				AbstractSymbol left_type = ((Expression) obj.getData("left")).get_type();
-				AbstractSymbol right_type = ((Expression) obj.getData("right")).get_type();
+				AbstractSymbol right_type =((Expression) obj.getData("right")).get_type();
 				
 				try {
 					TypeCheckerHelper.validateType(left_type);
@@ -583,7 +585,35 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(cond obj) 
 			{
-				return null;
+				AbstractSymbol ret_pred = ((Expression) obj.getData("ret_pred")).get_type();
+				AbstractSymbol ret_then_exp = ((Expression) obj.getData("ret_then_exp")).get_type();
+				AbstractSymbol ret_else_exp = ((Expression) obj.getData("ret_else_exp")).get_type();
+				
+				if(!ClassTable.getInstance().isSubClass(ret_pred,TreeConstants.Bool))
+					{
+						obj.getPred().set_type(TreeConstants.Object_);
+					}
+				
+				try 
+				{
+					TypeCheckerHelper.validateType(ret_then_exp);
+				} 
+				catch (SemanticException e) 
+				{
+					semant_errors.semantError(obj, "Undeclared identifier %s", ret_then_exp);
+				}
+				
+				try 
+				{
+					TypeCheckerHelper.validateType(ret_else_exp);
+				} 
+				catch (SemanticException e) 
+				{
+					semant_errors.semantError(obj, "Undeclared identifier %s", ret_else_exp);
+				}
+				
+				AbstractSymbol lub = ClassTable.getInstance().leastUpperBound(ret_then_exp,ret_else_exp);
+				return obj.set_type(lub);
 			}
 	
 		});
