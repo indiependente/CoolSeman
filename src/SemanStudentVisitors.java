@@ -568,8 +568,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(mul obj) 
 			{
-				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
-				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				AbstractSymbol left_child_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_child_type = (AbstractSymbol) obj.getData("right");
 				try{
 					TypeCheckerHelper.validateType(left_child_type);
 					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
@@ -589,8 +589,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(sub obj) 
 			{
-				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
-				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				AbstractSymbol left_child_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_child_type = (AbstractSymbol) obj.getData("right");
 				try{
 					TypeCheckerHelper.validateType(left_child_type);
 					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
@@ -610,8 +610,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(plus obj) 
 			{
-				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
-				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				AbstractSymbol left_child_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_child_type = (AbstractSymbol) obj.getData("right");
 				try{
 					TypeCheckerHelper.validateType(left_child_type);
 					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
