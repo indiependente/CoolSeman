@@ -515,9 +515,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 		{
 
 			@Override
-			public Object action(no_expr obj) {
-				// TODO Auto-generated method stub
-				return null;
+			public Object action(no_expr obj)
+			{
+				return obj.set_type(TreeConstants.No_type);
 			}
 	
 		});
@@ -658,7 +658,37 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(let obj) 
 			{
-				return null;
+				//check the identifier name in the let stmt: it must not be 'self'
+				AbstractSymbol letId = (AbstractSymbol)obj.getData("identifier");
+				if(letId.getString().equals("self"))
+				{
+					//'self' cannot be bound in a 'let' expression.
+					semant_errors.semantError(obj, "'self' cannot be bound in a 'let' expression.");	
+				}
+				
+				//check id the identifier class in the let stmt is already defined
+				AbstractSymbol letIdType = (AbstractSymbol)obj.getData("type_decl");
+				try {
+					TypeCheckerHelper.validateType(letIdType);
+				} catch (SemanticException e) {
+					semant_errors.semantError(obj, "Class "+ letIdType + 
+							" of let-bound identifier " + letId + " is undefined.");	
+				}
+				
+				//check if the init type is conform to the declared objectId type in the let stmt
+				AbstractSymbol initType = (AbstractSymbol) obj.getData("init");
+				try {
+					TypeCheckerHelper.validateType(initType);
+					TypeCheckerHelper.typeMatchAny(letIdType, initType);
+				} catch (SemanticException e) {
+					//Inferred type Int of initialization of x does not conform to identifier's declared type String.
+					semant_errors.semantError(obj, "Inferred type " + letIdType + " of initialization of "
+							+ letId + " does not conform to identifier's declared type " + initType);	
+				}
+				
+				//set the return type to the block's return type
+				Expression ret_type = (Expression) obj.getData("body");
+				return obj.set_type(ret_type.get_type());
 			}
 	
 		});

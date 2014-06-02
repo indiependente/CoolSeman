@@ -1367,9 +1367,17 @@ class let extends Expression {
 		 * valutare il body e calcolarne il tipo di ritorno
 		 * 
 		 */
+
 		visitor.onVisitPreOrder(this);
+		
+		decorate("identifier",identifier );
+		decorate("type_decl",type_decl );
+		decorate("init",init);
+		decorate("body",body );
+		
 		Object ret_init = init.accept(visitor);
 		Object ret_body = body.accept(visitor);
+		
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
