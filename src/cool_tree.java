@@ -1149,6 +1149,8 @@ class loop extends Expression {
 		visitor.onVisitPreOrder(this);
 		Object ret_pred = pred.accept(visitor);
 		Object ret_body = body.accept(visitor);
+		
+		decorate("pred", ret_pred);
 
 		visitor.onVisitPostOrder(this);
 
@@ -1275,6 +1277,7 @@ class block extends Expression {
 		 */
 		visitor.onVisitPreOrder(this);
 		Object ret_block = body.accept(visitor);
+		decorate("ret_block", ret_block);
 		return visitor.onVisitPostOrder(this);
 	}
 
