@@ -69,6 +69,16 @@ class TypeCheckerHelper
 		}
 		return returnType;
 	}
+
+	public static void typeMatchAny(AbstractSymbol type, AbstractSymbol... symbols) throws SemanticException 
+	{
+		for (AbstractSymbol sym : symbols)
+		{
+			if (type.equals(sym)) 
+				return;
+		}
+		throw new SemanticException();
+	}
 	
 }
 
