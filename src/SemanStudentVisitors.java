@@ -912,7 +912,19 @@ class TypeCheckerVisitor implements ITreeVisitor
 	public Object onVisitPostOrder(Case branch) {
 		AbstractSymbol absym = (AbstractSymbol) branch.getData("branch_type");
 		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType(absym);
-		AbstractSymbol static_type_symbol = TypeCheckerHelper.inferSelfType(branch.getReturnType());
+		AbstractSymbol static_type_symbol = branch.getReturnType();
+		
+		if(branch.getName().equals("self"))
+		{
+			SemantErrorsManager.getInstance().semantError(branch, "'self' bound in 'case'.");
+		}
+		
+		
+		if(static_type_symbol.equals(TreeConstants.SELF_TYPE))
+		{
+			SemantErrorsManager.getInstance().semantError(branch, "Identifier %s declared with type SELF_TYPE in case branch.", branch.getName());
+		}
+		
 		try
 		{
 			TypeCheckerHelper.validateType(branch_type_symbol);
@@ -922,9 +934,16 @@ class TypeCheckerVisitor implements ITreeVisitor
 		catch(Exception e)
 		{
 		}
+		
+		
+		semant_state.getScopeManager().enterScope();
+		
+		semant_state.getScopeManager().addId(branch.getName(), ClassTable.getInstance().lookup(branch_type_symbol));
+		
 		return branch_type_symbol;
 	}
 
+	
 	@Override
 	public Object onVisitPostOrder(Expression expr) 
 	{
