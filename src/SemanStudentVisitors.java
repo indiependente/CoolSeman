@@ -494,7 +494,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(mul obj) 
 			{
-				return null;
+				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
+				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				try{
+					TypeCheckerHelper.validateType(left_child_type);
+					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
+					TypeCheckerHelper.validateType(right_child_type);
+					TypeCheckerHelper.typeMatch(right_child_type, TreeConstants.Int);
+				}catch (SemanticException e){
+					semant_errors.semantError(obj, "non-Int arguments: %s * %s", left_child_type, right_child_type);	
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -505,7 +515,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(sub obj) 
 			{
-				return null;
+				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
+				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				try{
+					TypeCheckerHelper.validateType(left_child_type);
+					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
+					TypeCheckerHelper.validateType(right_child_type);
+					TypeCheckerHelper.typeMatch(right_child_type, TreeConstants.Int);
+				}catch (SemanticException e){
+					semant_errors.semantError(obj, "non-Int arguments: %s - %s", left_child_type, right_child_type);	
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -516,7 +536,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(plus obj) 
 			{
-				return null;
+				AbstractSymbol left_child_type = ((Expression) obj.getData("left")).get_type();
+				AbstractSymbol right_child_type = ((Expression) obj.getData("right")).get_type();
+				try{
+					TypeCheckerHelper.validateType(left_child_type);
+					TypeCheckerHelper.typeMatch(left_child_type, TreeConstants.Int);
+					TypeCheckerHelper.validateType(right_child_type);
+					TypeCheckerHelper.typeMatch(right_child_type, TreeConstants.Int);
+				}catch (SemanticException e){
+					semant_errors.semantError(obj, "non-Int arguments: %s + %s", left_child_type, right_child_type);	
+				}
+				return obj.set_type(TreeConstants.Int);
 			}
 	
 		});
