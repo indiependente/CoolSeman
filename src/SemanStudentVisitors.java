@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -353,7 +354,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(object obj) 
 			{
 				Class_ type = (Class_) semant_state.getScopeManager().lookup(obj.getName());
-				return obj.set_type(type.getName());	
+				if (type == null)
+				{
+					semant_errors.semantError(obj, "Undeclared identifier %s.", obj.getName());
+				}
+				return obj.set_type(TypeCheckerHelper.inferSelfType(type.getName()));	
 			}
 	
 		});
@@ -546,7 +551,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		{
 			@Override
 			public Object action(divide obj) 
-			{
+			{	 
 				 AbstractSymbol left_child = (AbstractSymbol) obj.getData("left");
 				 AbstractSymbol right_child = (AbstractSymbol) obj.getData("right");
 				 
@@ -876,8 +881,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPostOrder(Cases cases) {
-		// TODO Auto-generated method stub
-		return null;
+		AbstractSymbol[] type_list = (AbstractSymbol[]) cases.getData("type_list");
+		return ClassTable.getInstance().leastUpperBound(type_list);	
 	}
 
 	@Override

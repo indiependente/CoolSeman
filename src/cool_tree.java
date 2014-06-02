@@ -276,11 +276,17 @@ class Cases extends ListNode {
 	@Override
 	public Object accept(ITreeVisitor visitor) {
 		visitor.onVisitPreOrder(this);
+		AbstractSymbol[] type_list = new AbstractSymbol[getLength()];
+		int i=0;
+		
 		for (Enumeration e = getElements(); e.hasMoreElements(); )
 		{
 			Case itm = (Case) e.nextElement();
-			itm.accept(visitor);
+			type_list[i]=(AbstractSymbol)itm.accept(visitor);
+			i++;
 		}
+		
+		decorate("type_list", type_list);
 		/*
 		 * calcolare il lub di tutti i branch e restituirlo
 		 */
