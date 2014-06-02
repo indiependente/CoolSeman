@@ -109,6 +109,15 @@ class ExpressionTypeSelector
 {
 	HashMap<Class<?>, IAction<Expression>> binded_actions;
 	
+	IAction<Expression> dummy = new IAction<Expression>()
+	{
+		@Override
+		public Object action(Expression obj) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	};
+	
 	public ExpressionTypeSelector()
 	{
 		binded_actions = new HashMap<Class<?>, IAction<Expression>>();
@@ -129,7 +138,8 @@ class ExpressionTypeSelector
 		if (binded_actions.containsKey(cls))
 			return binded_actions.get(cls);
 		else
-			throw new RuntimeException("binded action for type " + cls.getName() + " not found");
+			return dummy;
+			//throw new RuntimeException("binded action for type " + cls.getName() + " not found");
 	}
 	
 	public <T extends Expression> Object execute(T object)
@@ -340,15 +350,25 @@ class FeaturesVisitor extends DefaultVisitor
 class TypeCheckerVisitor implements ITreeVisitor
 {
 	
-	protected ExpressionTypeSelector selector;
+	protected ExpressionTypeSelector postorder_binder, preorder_binder;
 	protected SemantState semant_state = SemantState.getInstance();
 	protected SemantErrorsManager semant_errors = SemantErrorsManager.getInstance();
 	
 	public TypeCheckerVisitor()
 	{
-		selector = new ExpressionTypeSelector();
+		postorder_binder = new ExpressionTypeSelector();
+		preorder_binder = new ExpressionTypeSelector();
 		
-		selector.register(object.class, new IAction<object>()
+		preorder_binder.register(let.class, new IAction<let>()
+		{
+			@Override
+			public Object action(let obj) {
+				// TODO Auto-generated method stub
+				return null;
+			}	
+		});
+		
+		postorder_binder.register(object.class, new IAction<object>()
 		{
 			@Override
 			public Object action(object obj) 
@@ -363,7 +383,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
-		selector.register(int_const.class, new IAction<int_const>()
+		postorder_binder.register(int_const.class, new IAction<int_const>()
 		{
 			@Override
 			public Object action(int_const obj) 
@@ -373,7 +393,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
-		selector.register(bool_const.class, new IAction<bool_const>()
+		postorder_binder.register(bool_const.class, new IAction<bool_const>()
 		{
 			@Override
 			public Object action(bool_const obj) 
@@ -383,7 +403,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
-		selector.register(isvoid.class, new IAction<isvoid>()
+		postorder_binder.register(isvoid.class, new IAction<isvoid>()
 		{
 			@Override
 			public Object action(isvoid obj) 
@@ -393,7 +413,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
-		selector.register(string_const.class, new IAction<string_const>()
+		postorder_binder.register(string_const.class, new IAction<string_const>()
 		{
 			@Override
 			public Object action(string_const obj) 
@@ -403,7 +423,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
-		selector.register(comp.class, new IAction<comp>()
+		postorder_binder.register(comp.class, new IAction<comp>()
 		{
 			@Override
 			public Object action(comp obj) 
@@ -422,7 +442,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(new_.class, new IAction<new_>()
+		postorder_binder.register(new_.class, new IAction<new_>()
 		{
 			@Override
 			public Object action(new_ obj) 
@@ -441,7 +461,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(leq.class, new IAction<leq>()
+		postorder_binder.register(leq.class, new IAction<leq>()
 		{
 			@Override
 			public Object action(leq obj) 
@@ -464,7 +484,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(eq.class, new IAction<eq>()
+		postorder_binder.register(eq.class, new IAction<eq>()
 		{
 			@Override
 			public Object action(eq obj) 
@@ -491,7 +511,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
-		selector.register(no_expr.class, new IAction<no_expr>()
+		postorder_binder.register(no_expr.class, new IAction<no_expr>()
 		{
 
 			@Override
@@ -503,7 +523,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(lt.class, new IAction<lt>()
+		postorder_binder.register(lt.class, new IAction<lt>()
 		{
 			@Override
 			public Object action(lt obj) 
@@ -526,7 +546,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(neg.class, new IAction<neg>()
+		postorder_binder.register(neg.class, new IAction<neg>()
 		{
 			@Override
 			public Object action(neg obj) 
@@ -547,7 +567,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(divide.class, new IAction<divide>()
+		postorder_binder.register(divide.class, new IAction<divide>()
 		{
 			@Override
 			public Object action(divide obj) 
@@ -570,7 +590,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(mul.class, new IAction<mul>()
+		postorder_binder.register(mul.class, new IAction<mul>()
 		{
 			@Override
 			public Object action(mul obj) 
@@ -591,7 +611,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(sub.class, new IAction<sub>()
+		postorder_binder.register(sub.class, new IAction<sub>()
 		{
 			@Override
 			public Object action(sub obj) 
@@ -612,7 +632,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(plus.class, new IAction<plus>()
+		postorder_binder.register(plus.class, new IAction<plus>()
 		{
 			@Override
 			public Object action(plus obj) 
@@ -633,7 +653,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(let.class, new IAction<let>()
+		postorder_binder.register(let.class, new IAction<let>()
 		{
 			@Override
 			public Object action(let obj) 
@@ -644,7 +664,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(block.class, new IAction<block>()
+		postorder_binder.register(block.class, new IAction<block>()
 		{
 			@Override
 			public Object action(block obj) 
@@ -664,7 +684,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(typcase.class, new IAction<typcase>()
+		postorder_binder.register(typcase.class, new IAction<typcase>()
 		{
 			@Override
 			public Object action(typcase obj) 
@@ -675,7 +695,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(loop.class, new IAction<loop>()
+		postorder_binder.register(loop.class, new IAction<loop>()
 		{
 			@Override
 			public Object action(loop obj) 
@@ -696,7 +716,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(cond.class, new IAction<cond>()
+		postorder_binder.register(cond.class, new IAction<cond>()
 		{
 			@Override
 			public Object action(cond obj) 
@@ -736,7 +756,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(dispatch.class, new IAction<dispatch>()
+		postorder_binder.register(dispatch.class, new IAction<dispatch>()
 		{
 			@Override
 			public Object action(dispatch obj) 
@@ -759,7 +779,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj.getName());
 				if (meth == null)
 				{
-					SemantErrorsManager.getInstance().semantError(obj, "Dispatch to undefined method %s.", obj.getName());
+					semant_errors.semantError(obj, "Dispatch to undefined method %s.", obj.getName());
 				}
 				
 				return obj.set_type(meth.getReturnType());
@@ -768,7 +788,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(static_dispatch.class, new IAction<static_dispatch>()
+		postorder_binder.register(static_dispatch.class, new IAction<static_dispatch>()
 		{
 			@Override
 			public Object action(static_dispatch obj) 
@@ -779,7 +799,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				
 				if (typeSym.equals("SELF_TYPE"))
 				{
-					SemantErrorsManager.getInstance().semantError(obj, "Static dispatch to SELF_TYPE.");
+					semant_errors.semantError(obj, "Static dispatch to SELF_TYPE.");
 					return obj.set_type(TreeConstants.Object_);	// set static dispatch type to object
 				}
 				
@@ -789,13 +809,13 @@ class TypeCheckerVisitor implements ITreeVisitor
 				// it should never enter in this if statement
 				if (myCls == null)	// if the dispatch caller class is not defined
 				{
-					SemantErrorsManager.getInstance().semantError(obj, "Static dispatch to undefined class %s.", typeSym);
+					semant_errors.semantError(obj, "Static dispatch to undefined class %s.", typeSym);
 					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
 				
 				if (!ClassTable.getInstance().isSubClass(myCls, typeCls))
 				{
-					SemantErrorsManager.getInstance().semantError(obj,
+					semant_errors.semantError(obj,
 							"Expression type %s does not conform to declared static dispatch type %s.",
 							mySym, typeSym);
 				}
@@ -810,7 +830,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				method meth = FeaturesTable.lookupMethod(typeSym, obj.getName());
 				if (meth == null)
 				{
-					SemantErrorsManager.getInstance().semantError(obj, "Static dispatch to undefined method %s.", obj.getName());
+					semant_errors.semantError(obj, "Static dispatch to undefined method %s.", obj.getName());
 				}
 				
 				return obj.set_type(meth.getReturnType());
@@ -820,7 +840,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		});
 		
 		
-		selector.register(assign.class, new IAction<assign>()
+		postorder_binder.register(assign.class, new IAction<assign>()
 		{
 			@Override
 			public Object action(assign obj) 
@@ -947,7 +967,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPostOrder(Expression expr) 
 	{
-		return selector.execute(expr);
+		return postorder_binder.execute(expr);
 	}
 
 	/**
@@ -1012,8 +1032,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPreOrder(Expression expr) {
-		// TODO Auto-generated method stub
-		return null;
+		return preorder_binder.execute(expr);
 	}
 
 	@Override
