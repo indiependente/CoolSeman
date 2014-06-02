@@ -582,7 +582,28 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(dispatch obj) 
 			{
-				return null;
+				ClassTable cTbl = ClassTable.getInstance();
+				
+				Class_ myCls = cTbl.lookup((AbstractSymbol)obj.getData("expr_type")); // the expr class
+				// it should never enter in this if statement
+				if (myCls == null)	// if the dispatch caller class is not defined
+				{
+					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+				}
+				
+				// this validation, validates the actuals params too
+				boolean isValid = FeaturesTable.validateDispatch(myCls.getName(), obj);
+				if (!isValid)
+				{
+					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+				}
+				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj);
+				if (meth == null)
+				{
+					SemantErrorsManager.getInstance().semantError(obj, "Dispatch to undefined method %s.", obj.getName());
+				}
+				
+				return obj.set_type(meth.getReturnType());
 			}
 	
 		});
