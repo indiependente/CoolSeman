@@ -999,8 +999,9 @@ class dispatch extends Expression {
 		 * 
 		 */
 		visitor.onVisitPreOrder(this);
-		Object ret_expr = expr.accept(visitor);
+		AbstractSymbol expr_type = (AbstractSymbol)expr.accept(visitor); 
 		actual.accept(visitor);
+		decorate("expr_type", expr_type); // save the expr type
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}

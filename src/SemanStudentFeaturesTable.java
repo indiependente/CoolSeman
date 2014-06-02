@@ -249,24 +249,6 @@ class FeaturesTable
 				return null;
 	}
 	
-	
-	/**
-	 * Checks if the AbstractSymbol sym that represents the Feature,
-	 * belongs to the owner class' methods.
-	 * @param sym	The feature to be checked
-	 * @return	The method node associated to the sym parameter.
-	 */
-	public method lookupStaticMethod(AbstractSymbol sym)
-	{
-		if(featuresList.containsKey(sym))
-		{
-			return (method) featuresList.get(sym);
-		}
-		return null;
-	}
-	
-	
-	
 	public boolean isAttributeRegistered(AbstractSymbol sym)
 	{
 		return lookupAttr(sym) != null;
@@ -277,18 +259,28 @@ class FeaturesTable
 		return lookupMethod(sym) != null;
 	}
 	
-	public boolean isStaticMethodRegistered(AbstractSymbol sym)
-	{
-		return lookupStaticMethod(sym) != null;
-	}
-	
-	
 	/**
 	 * This method checks if a dispatch node respects the signature of the method
 	 * @param d the dispatch node to validate
 	 * @return true if the dispatch is correct, else false
 	 */
 	public boolean validateDispatch(dispatch d){
+		AbstractSymbol dName = d.getName();
+		method meth = lookupMethod(dName);
+		
+		if(meth == null)
+			return false;
+		
+		Expressions actuals = d.getActual();
+		Formals formals = meth.getFormals();
+		
+		Enumeration eForm = formals.getElements();
+		Enumeration eAct = actuals.getElements();
+				
+		return validateActualsFormals(eForm, eAct);
+	}
+	
+	public boolean validateDispatch(static_dispatch d){
 		AbstractSymbol dName = d.getName();
 		method meth = lookupMethod(dName);
 		
@@ -330,6 +322,10 @@ class FeaturesTable
 		symTab.enterScope();
 		numLevels++;
 		addClassFeaturesToLocalScope(sym, cTbl, symTab);
+		
+		// adding self... 
+		
+		symTab.addId(TreeConstants.self, cTbl.lookup(sym));
 		
 		return numLevels;
 	}
@@ -400,26 +396,39 @@ class FeaturesTable
 		return true;
 	}
 	
+	/**
+	 * Validates the dispatch for the sym type on method d.
+	 * Example: expr.method(actuals); 
+	 * 		featuresTable.validateDispatch(typeof(expr), dispatchof(method));
+	 * @param sym The class type to be checked
+	 * @param d	The dispatch to be checked
+	 * @return True if the dispatch is valid
+	 */
+	public static boolean validateDispatch(AbstractSymbol sym, dispatch d)
+	{
+		return ClassTable.getInstance().lookup(sym).getFeaturesTable().validateDispatch(d);
+	}
 	
 	/**
-	 * This method checks if a static dispatch node respects the signature of the method
-	 * @param sd the static dispatch node to validate
-	 * @return true if the static dispatch is correct, else false
+	 * Validates the dispatch for the static sym type on method d
+	 * Example: featuresTable.validateDispatch(typeof(expr@type), dispatchof(method));
+	 * @param sym The static class type to be checked
+	 * @param d	The dispatch to be checked
+	 * @return True if the dispatch is valid
 	 */
-	public boolean validateStaticDispatch(static_dispatch sd)
+	public static boolean validateDispatch(AbstractSymbol symType, static_dispatch d)
 	{
-		AbstractSymbol sdName = sd.getName();
-		method meth = lookupStaticMethod(sdName);
-		
-		if(meth == null)
-			return false;
-		
-		Expressions actuals = sd.getActual();
-		Formals formals = meth.getFormals();
-		
-		Enumeration eForm = formals.getElements();
-		Enumeration eAct = actuals.getElements();
-				
-		return validateActualsFormals(eForm, eAct);
+		return ClassTable.getInstance().lookup(symType).getFeaturesTable().validateDispatch(d);
+	}
+	
+	/**
+	 * Looks for the method d.name in the sym type
+	 * @param sym The class to look in
+	 * @param d	The dispatch to look for
+	 * @return	The method node in the AST
+	 */
+	public static method lookupMethod(AbstractSymbol sym, dispatch d)
+	{
+		return ClassTable.getInstance().lookup(sym).getFeaturesTable().lookupMethod(d.getName());
 	}
 }

@@ -354,7 +354,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(object obj) 
 			{
 				Class_ type = (Class_) semant_state.getScopeManager().lookup(obj.getName());
-				return obj.set_type(type.getName());	
+				if (type == null)
+				{
+					semant_errors.semantError(obj, "Undeclared identifier %s.", obj.getName());
+				}
+				return obj.set_type(TypeCheckerHelper.inferSelfType(type.getName()));	
 			}
 	
 		});
@@ -703,7 +707,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 				
 				if(!ClassTable.getInstance().isSubClass(ret_pred,TreeConstants.Bool))
 					{
-						obj.getPred().set_type(TreeConstants.Object_);
+						semant_errors.semantError(obj, "Predicate of 'if' does not have type Bool.");
+						return obj.set_type(TreeConstants.Object_);
 					}
 				
 				try 
@@ -736,7 +741,28 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(dispatch obj) 
 			{
-				return null;
+				ClassTable cTbl = ClassTable.getInstance();
+				
+				Class_ myCls = cTbl.lookup((AbstractSymbol)obj.getData("expr_type")); // the expr class
+				// it should never enter in this if statement
+				if (myCls == null)	// if the dispatch caller class is not defined
+				{
+					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+				}
+				
+				// this validation, validates the actuals params too
+				boolean isValid = FeaturesTable.validateDispatch(myCls.getName(), obj);
+				if (!isValid)
+				{
+					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+				}
+				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj);
+				if (meth == null)
+				{
+					SemantErrorsManager.getInstance().semantError(obj, "Dispatch to undefined method %s.", obj.getName());
+				}
+				
+				return obj.set_type(meth.getReturnType());
 			}
 	
 		});
