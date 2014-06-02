@@ -439,7 +439,19 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(leq obj) 
 			{
-				return null;
+				AbstractSymbol left_type = ((Expression) obj.getData("left")).get_type();
+				AbstractSymbol right_type = ((Expression) obj.getData("right")).get_type();
+				
+				try {
+					TypeCheckerHelper.validateType(left_type);
+					TypeCheckerHelper.validateType(right_type);
+					TypeCheckerHelper.typeMatch(left_type, TreeConstants.Int);
+					TypeCheckerHelper.typeMatch(right_type, TreeConstants.Int);
+				} catch (SemanticException e) {
+					semant_errors.semantError(obj, "non-Int arguments: %s < %s", left_type, right_type);	
+				}
+				
+				return  obj.set_type(TreeConstants.Int);
 			}
 	
 		});
@@ -632,8 +644,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 * this method analyses if a method node is semantically correct 
 	 */
 	public Object onVisitPostOrder(method mth) {
-		Expression expr = (Expression) mth.getData("dyn_return_type");
-		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(expr.get_type());
+		AbstractSymbol absym = (AbstractSymbol) mth.getData("dyn_return_type");
+		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym);
 		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
 		try
 		{
@@ -653,8 +665,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 * it checks if attr node is semantically correct
 	 */
 	public Object onVisitPostOrder(attr itm) {
-		Expression expr = (Expression) itm.getData("init_type");
-		AbstractSymbol init_type_symbol = TypeCheckerHelper.inferSelfType(expr.get_type());
+		AbstractSymbol absym = (AbstractSymbol) itm.getData("init_type");
+		AbstractSymbol init_type_symbol = TypeCheckerHelper.inferSelfType(absym);
 		AbstractSymbol static_type_symbol = TypeCheckerHelper.inferSelfType(itm.getReturnType());
 		try
 		{
@@ -696,10 +708,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	/**
 	 * it checks if a case node is semantically correct
+	 * 
 	 */
 	public Object onVisitPostOrder(Case branch) {
-		Expression expr = (Expression) branch.getData("branch_type");
-		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType((AbstractSymbol) expr.get_type());
+		AbstractSymbol absym = (AbstractSymbol) branch.getData("branch_type");
+		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType(absym);
 		AbstractSymbol static_type_symbol = TypeCheckerHelper.inferSelfType(branch.getReturnType());
 		try
 		{

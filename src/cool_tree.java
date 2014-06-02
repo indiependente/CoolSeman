@@ -745,8 +745,9 @@ class branch extends Case {
 	@Override
 	public Object accept(ITreeVisitor visitor) {
 		/*
-		 * validare type_decl e name
-		 * aggiungere type_decl/name in O e passare su expr con il visitor
+		 * (semant state get scope manager )
+		 * validare type_decl e name (spostare in pre order)
+		 * aggiungere type_decl/name in O (fare in pre order) e passare su expr con il visitor
 		 */
 		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
