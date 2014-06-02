@@ -683,7 +683,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 				
 				if(!ClassTable.getInstance().isSubClass(ret_pred,TreeConstants.Bool))
 					{
-						obj.getPred().set_type(TreeConstants.Object_);
+						semant_errors.semantError(obj, "Predicate of 'if' does not have type Bool.");
+						return obj.set_type(TreeConstants.Object_);
 					}
 				
 				try 
