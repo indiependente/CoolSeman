@@ -433,6 +433,182 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
+		
+		selector.register(leq.class, new IAction<leq>()
+		{
+			@Override
+			public Object action(leq obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(eq.class, new IAction<eq>()
+		{
+			@Override
+			public Object action(eq obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(lt.class, new IAction<lt>()
+		{
+			@Override
+			public Object action(lt obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(neg.class, new IAction<neg>()
+		{
+			@Override
+			public Object action(neg obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(divide.class, new IAction<divide>()
+		{
+			@Override
+			public Object action(divide obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(mul.class, new IAction<mul>()
+		{
+			@Override
+			public Object action(mul obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(sub.class, new IAction<sub>()
+		{
+			@Override
+			public Object action(sub obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(plus.class, new IAction<plus>()
+		{
+			@Override
+			public Object action(plus obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(let.class, new IAction<let>()
+		{
+			@Override
+			public Object action(let obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(block.class, new IAction<block>()
+		{
+			@Override
+			public Object action(block obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(typcase.class, new IAction<typcase>()
+		{
+			@Override
+			public Object action(typcase obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(loop.class, new IAction<loop>()
+		{
+			@Override
+			public Object action(loop obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(cond.class, new IAction<cond>()
+		{
+			@Override
+			public Object action(cond obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(dispatch.class, new IAction<dispatch>()
+		{
+			@Override
+			public Object action(dispatch obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(static_dispatch.class, new IAction<static_dispatch>()
+		{
+			@Override
+			public Object action(static_dispatch obj) 
+			{
+				return null;
+			}
+	
+		});
+		
+		
+		selector.register(assign.class, new IAction<assign>()
+		{
+			@Override
+			public Object action(assign obj) 
+			{
+				return null;
+			}
+	
+		});
+
 	}
 
 	@Override
