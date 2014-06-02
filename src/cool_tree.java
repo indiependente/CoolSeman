@@ -1085,7 +1085,7 @@ class cond extends Expression {
 	@Override
 	public Object accept(ITreeVisitor visitor) {
 		visitor.onVisitPreOrder(this);
-		Object ret_pred = visitor.onVisitPostOrder(pred);
+		Object ret_pred = pred.accept(visitor);
 		Object ret_then_exp = then_exp.accept(visitor);
 		Object ret_else_exp = else_exp.accept(visitor);
 		
