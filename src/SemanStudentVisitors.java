@@ -353,7 +353,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(object obj) 
 			{
 				Class_ type = (Class_) semant_state.getScopeManager().lookup(obj.getName());
-				return obj.set_type(type.getName());	
+				if (type == null)
+				{
+					semant_errors.semantError(obj, "Undeclared identifier %s.", obj.getName());
+				}
+				return obj.set_type(TypeCheckerHelper.inferSelfType(type.getName()));	
 			}
 	
 		});

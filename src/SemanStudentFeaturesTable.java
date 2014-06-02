@@ -323,6 +323,10 @@ class FeaturesTable
 		numLevels++;
 		addClassFeaturesToLocalScope(sym, cTbl, symTab);
 		
+		// adding self... 
+		
+		symTab.addId(TreeConstants.self, cTbl.lookup(sym));
+		
 		return numLevels;
 	}
 
