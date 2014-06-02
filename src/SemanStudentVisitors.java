@@ -448,10 +448,10 @@ class TypeCheckerVisitor implements ITreeVisitor
 					TypeCheckerHelper.typeMatch(left_type, TreeConstants.Int);
 					TypeCheckerHelper.typeMatch(right_type, TreeConstants.Int);
 				} catch (SemanticException e) {
-					semant_errors.semantError(obj, "non-Int arguments: %s < %s", left_type, right_type);	
+					semant_errors.semantError(obj, "non-Int arguments: %s <= %s", left_type, right_type);	
 				}
 				
-				return  obj.set_type(TreeConstants.Int);
+				return  obj.set_type(TreeConstants.Bool);
 			}
 	
 		});
@@ -462,7 +462,24 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(eq obj) 
 			{
-				return null;
+				AbstractSymbol left_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_type = (AbstractSymbol) obj.getData("right");
+				
+				try
+				{
+					TypeCheckerHelper.validateType(left_type);
+					TypeCheckerHelper.validateType(right_type);
+					TypeCheckerHelper.typeMatchAny(left_type, TreeConstants.Int, 
+							TreeConstants.Bool, TreeConstants.Str);
+					TypeCheckerHelper.typeMatchAny(right_type, TreeConstants.Int,
+							TreeConstants.Bool, TreeConstants.Str);
+					TypeCheckerHelper.typeMatch(left_type, right_type);
+				}
+				catch (SemanticException e) {
+					semant_errors.semantError(obj, "Illegal comparison with a basic type");	
+				}
+				
+				return  obj.set_type(TreeConstants.Bool);
 			}
 	
 		});
@@ -473,7 +490,19 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(lt obj) 
 			{
-				return null;
+				AbstractSymbol left_type = (AbstractSymbol) obj.getData("left");
+				AbstractSymbol right_type = (AbstractSymbol) obj.getData("right");
+				
+				try {
+					TypeCheckerHelper.validateType(left_type);
+					TypeCheckerHelper.validateType(right_type);
+					TypeCheckerHelper.typeMatch(left_type, TreeConstants.Int);
+					TypeCheckerHelper.typeMatch(right_type, TreeConstants.Int);
+				} catch (SemanticException e) {
+					semant_errors.semantError(obj, "non-Int arguments: %s < %s", left_type, right_type);	
+				}
+				
+				return  obj.set_type(TreeConstants.Bool);
 			}
 	
 		});
@@ -492,7 +521,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				}
 				catch (SemanticException ex)
 				{
-					
+					semant_errors.semantError(obj, "Argument of '~' has type %s instead of Int.", child_type);	
 				}
 				return obj.set_type(TreeConstants.Int);
 			}
