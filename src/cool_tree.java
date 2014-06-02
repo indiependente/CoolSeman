@@ -345,7 +345,7 @@ class programc extends Program {
 			visitor.onVisitEnd();
 		}
 
-		SemantErrorsManager.getInstance().validate();
+		SemantErrorsManager.getInstance().validate(true);
 		
 	}
 

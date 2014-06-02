@@ -484,6 +484,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 	
 		});
 		
+		selector.register(no_expr.class, new IAction<no_expr>()
+		{
+
+			@Override
+			public Object action(no_expr obj) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+	
+		});
+		
 		
 		selector.register(lt.class, new IAction<lt>()
 		{
