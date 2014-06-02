@@ -564,6 +564,7 @@ class method extends Feature {
 		 * inserire controllo sul lub del tipo restituito da exprr e return_type [modularizzare]
 		 * 
 		 */
+		
 		decorate("dyn_return_type", last_ret);
 		Object obj = visitor.onVisitPostOrder(this);
 		return null;
@@ -1008,7 +1009,7 @@ class dispatch extends Expression {
 		 * 
 		 */
 		visitor.onVisitPreOrder(this);
-		AbstractSymbol expr_type = (AbstractSymbol)expr.accept(visitor); 
+		AbstractSymbol expr_type = (AbstractSymbol) expr.accept(visitor); 
 		actual.accept(visitor);
 		decorate("expr_type", expr_type); // save the expr type
 		visitor.onVisitPostOrder(this);

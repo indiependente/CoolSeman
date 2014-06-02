@@ -251,7 +251,7 @@ class ClassTable {
     		return;
     	}
     
-//    	System.out.println("registering " + cls);
+//    	System.out.println("registering " + cls + " inherits " + parent);
     	table.put(cls, impl);
     	dag.addVertex(cls);
     

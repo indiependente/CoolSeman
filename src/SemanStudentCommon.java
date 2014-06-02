@@ -41,11 +41,11 @@ class TypeCheckerHelper
 	 * @param child 
 	 * @param parent
 	 */
-	static void validateCast(AbstractSymbol child, AbstractSymbol parent) throws SemanticException
+	static void validateCast(TreeNode node, AbstractSymbol child, AbstractSymbol parent) throws SemanticException
 	{
-		if (!child.equals(parent) || !class_table.isSubClass(child, parent))
+		if (!(child.equals(parent) || class_table.isSubClass(child, parent)))
 		{
-			semant_error.semantError(semant_state.getCurrentClass(), "Invalid cast: can't cast type %s to type %s", child, parent);	
+			semant_error.semantError(node, "Invalid cast: can't cast type %s to type %s", child, parent);	
 			throw new SemanticException();
 		}	
 	}

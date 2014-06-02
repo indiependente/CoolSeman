@@ -325,6 +325,9 @@ class FeaturesVisitor extends DefaultVisitor
 	@Override
 	public void onVisitEnd() 
 	{
+		/**
+		 * Preparare la features table per i metodi built-in
+		 */
 		SemantErrorsManager.getInstance().validate();
 	}
 	
@@ -896,18 +899,20 @@ class TypeCheckerVisitor implements ITreeVisitor
 		AbstractSymbol absym = (AbstractSymbol) mth.getData("dyn_return_type");
 		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym);
 		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
+		System.out.println("method " + dynamic_return_type_symbol + " " + static_return_type_symbol);
 		try
 		{
 			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
 			TypeCheckerHelper.validateType(static_return_type_symbol);
-			TypeCheckerHelper.validateCast(dynamic_return_type_symbol, static_return_type_symbol);
+			TypeCheckerHelper.validateCast(mth, dynamic_return_type_symbol, static_return_type_symbol);
 		}
 		catch (SemanticException e)
 		{		
 		}
-			
 		
-		return null;
+		semant_state.getScopeManager().exitScope();
+		
+		return mth;
 	}
 
 	/**
@@ -921,7 +926,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		{
 			TypeCheckerHelper.validateType(init_type_symbol);
 			TypeCheckerHelper.validateType(static_type_symbol);
-			TypeCheckerHelper.validateCast(init_type_symbol, static_type_symbol);
+			TypeCheckerHelper.validateCast(itm, init_type_symbol, static_type_symbol);
 		}
 		catch(Exception e)
 		{
@@ -943,9 +948,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPostOrder(Class_ cls) {
-		int numScopes = cls.getFeaturesTable().loadClassScope(cls.getName());
-		System.out.println(" PostOrder #SCOPES: "+numScopes);
-		System.out.println("Class_ Symbol Table PostOrder: \n"+SemantState.getInstance().getScopeManager());
+		 //cls.getFeaturesTable().loadClassScope(cls.getName());
+//		System.out.println(" PostOrder #SCOPES: "+numScopes);
+//		System.out.println("Class_ Symbol Table PostOrder: \n"+SemantState.getInstance().getScopeManager());
+		for (int numScopes = (int) cls.getData("numScopes"); numScopes >= 0; numScopes--)
+			semant_state.getScopeManager().exitScope();
 		return null;
 	}
 
@@ -979,7 +986,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		{
 			TypeCheckerHelper.validateType(branch_type_symbol);
 			TypeCheckerHelper.validateType(static_type_symbol);
-			TypeCheckerHelper.validateCast(branch_type_symbol, static_type_symbol);
+			TypeCheckerHelper.validateCast(branch, branch_type_symbol, static_type_symbol);
 		}
 		catch(Exception e)
 		{
@@ -1005,8 +1012,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 */
 	public Object onVisitPostOrder(Expressions expressions) {
 		Vector vect = expressions.getElementsVector();
-		Object obj = vect.elementAt(vect.size() - 1);
-		return ((Expression) obj).get_type();
+		int size = vect.size();
+		Object ret = null;
+		if (size > 0)
+			ret = ((Expression) (vect.elementAt(size - 1))).get_type();
+		return ret;
 	}
 
 	@Override
@@ -1043,8 +1053,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPreOrder(Class_ cls) {
 		int numScopes = cls.getFeaturesTable().loadClassScope(cls.getName());
-		System.out.println(" PreOrder #SCOPES: "+numScopes);
-		System.out.println("Class_ Symbol Table PreOrder: \n"+SemantState.getInstance().getScopeManager());
+		cls.decorate("numScopes", numScopes);
+//		System.out.println(" PreOrder #SCOPES: "+numScopes);
+//		System.out.println("Class_ Symbol Table PreOrder: \n"+SemantState.getInstance().getScopeManager());
 		return null;
 	}
 
