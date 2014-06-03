@@ -313,7 +313,7 @@ class FeaturesTable
 		
 		// adding self... 
 		
-		symTab.addId(TreeConstants.self, cTbl.lookup(sym));
+		symTab.addId(TreeConstants.self, TreeConstants.SELF_TYPE);
 		
 		return numLevels;
 	}

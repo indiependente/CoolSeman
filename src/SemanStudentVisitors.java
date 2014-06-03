@@ -393,6 +393,10 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(object obj) 
 			{
+				if(obj.getName().equals(TreeConstants.self))
+				{
+					return obj.set_type(TreeConstants.SELF_TYPE);
+				}
 				Class_ type = (Class_) semant_state.getScopeManager().lookup(obj.getName());
 				if (type == null)
 				{
