@@ -81,7 +81,6 @@ class ClassTable {
 		//                                 of class name
 		//        copy() : SELF_TYPE       returns a copy of the object
 	
-		System.out.println("sss");
 		
 		class_c Object_class = 
 		    new class_c(0, 

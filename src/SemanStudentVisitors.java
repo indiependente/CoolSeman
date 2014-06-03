@@ -307,9 +307,6 @@ class FeaturesVisitor extends DefaultVisitor
 	public Object onVisitPostOrder(attr attr) {
 		Class_ cls = SemantState.getInstance().getCurrentClass();
 		cls.getFeaturesTable().registerAttr(attr);
-		/*	TEST	*/
-//		System.out.println(cls.getName() + ": "+ attr.name.str + ": " + cls.getFeaturesTable().isAttributeRegistered(attr.name));
-		/*	END TEST	*/
 		return null;
 	}
 	
@@ -317,9 +314,6 @@ class FeaturesVisitor extends DefaultVisitor
 	public Object onVisitPostOrder(method meth) {
 		Class_ cls = SemantState.getInstance().getCurrentClass();
 		cls.getFeaturesTable().registerMethod(meth);
-		/*	TEST	*/
-//		System.out.println(cls.getName() + ": "+ meth.name.str + ": " + cls.getFeaturesTable().isMethodRegistered(meth.name));
-		/*	END TEST	*/
 		return null;
 	}
 	
@@ -951,7 +945,6 @@ class TypeCheckerVisitor implements ITreeVisitor
 		AbstractSymbol absym = (AbstractSymbol) mth.getData("dyn_return_type");
 		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym);
 		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
-//		System.out.println("method " + dynamic_return_type_symbol + " " + static_return_type_symbol);
 		try
 		{
 			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
@@ -1001,8 +994,6 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPostOrder(Class_ cls) {
 		 //cls.getFeaturesTable().loadClassScope(cls.getName());
-//		System.out.println(" PostOrder #SCOPES: "+numScopes);
-//		System.out.println("Class_ Symbol Table PostOrder: \n"+SemantState.getInstance().getScopeManager());
 		for (int numScopes = (int) cls.getData("numScopes"); numScopes >= 0; numScopes--)
 			semant_state.getScopeManager().exitScope();
 		return null;
@@ -1078,7 +1069,6 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPreOrder(method itm) {
 		SemantState.getInstance().getCurrentClass().getFeaturesTable().loadMethodScope(itm.getName());
-		System.out.println("method Symbol Table PreOrder: \n"+SemantState.getInstance().getScopeManager());
 		return null;
 	}
 
@@ -1104,8 +1094,6 @@ class TypeCheckerVisitor implements ITreeVisitor
 	public Object onVisitPreOrder(Class_ cls) {
 		int numScopes = cls.getFeaturesTable().loadClassScope(cls.getName());
 		cls.decorate("numScopes", numScopes);
-//		System.out.println(" PreOrder #SCOPES: "+numScopes);
-//		System.out.println("Class_ Symbol Table PreOrder: \n"+SemantState.getInstance().getScopeManager());
 		return null;
 	}
 
@@ -1147,197 +1135,3 @@ class TypeCheckerVisitor implements ITreeVisitor
 	}
 	
 }
-
-/*
-class ConcreteVisitor implements ITreeVisitor
-{
-	static ExpressionTypeSelector selector = new ExpressionTypeSelector();
-	
-	static {
-		selector.register(dispatch.class, new IAction<dispatch>() {
-
-			@Override
-			public void action(dispatch data) {
-				//System.out.println("dispatch");
-				System.out.println(data.toString());
-				
-			}
-			
-		});
-		
-		selector.register(string_const.class, new IAction<string_const>() {
-
-			@Override
-			public void action(string_const data) {
-				//System.out.println("str_const");
-				System.out.println(data.toString());
-				
-			}
-			
-		});
-		
-		selector.register(object.class, new IAction<object>() {
-
-			@Override
-			public void action(object data) {
-				System.out.println("???");
-				System.out.println(data.toString());
-			}
-			
-		});
-		selector.register(object.class, new IAction<object>() {
-
-			@Override
-			public void action(object data) {
-				System.out.println("!!!!");
-				System.out.println(data.toString());
-			}
-			
-		});
-	}
-	
-	private ClassTable class_table;
-	
-	public ConcreteVisitor(ClassTable cls_tbl)
-	{
-		class_table = cls_tbl;
-	}
-
-	@Override
-	public Object visit(method itm) {
-		// TODO Auto-generated method stub
-		System.out.println("method");
-		return null;
-	}
-
-	@Override
-	public Object visit(attr itm) {
-		// TODO Auto-generated method stub
-		System.out.println("attr");
-		return null;
-	}
-
-	@Override
-	public Object visit(Cases cases) {
-		// TODO Auto-generated method stub
-		System.out.println("Cases");
-		return null;
-	}
-
-	@Override
-	public Object visit(Program program) {
-		// TODO Auto-generated method stub
-		System.out.println("programc");
-		return null;
-	}
-
-	@Override
-	public Object visit(Class_ cls) {
-		// TODO Auto-generated method stub
-		System.out.println("Class_");
-		class_table.registerClass(cls);
-		return null;
-	}
-
-	@Override
-	public Object visit(Formal formal) {
-		// TODO Auto-generated method stub
-		System.out.println("Formal");
-		return null;
-	}
-
-	@Override
-	public Object visit(Case branch) {
-		// TODO Auto-generated method stub
-		System.out.println("Case");
-		return null;
-	}
-
-	@Override
-	public Object visit(Expression expr) {
-		// TODO Auto-generated method stub
-		//System.out.println("Expression");
-		selector.execute(expr);
-		return null;
-	}
-
-	@Override
-	public Object visit(Expressions expressions) {
-		// TODO Auto-generated method stub
-		System.out.println("Expressions");
-		return null;
-	}
-
-	@Override
-	public void onVisitEnd() {
-		// TODO Auto-generated method stub
-		AbstractSymbol[] list = {
-				AbstractTable.idtable.addString("Object"),
-				AbstractTable.idtable.addString("IO"),
-				AbstractTable.idtable.addString("Main"),
-				AbstractTable.idtable.addString("A"),
-				AbstractTable.idtable.addString("B")
-		};
-		
-		for (AbstractSymbol s : list)
-		{
-			System.out.println(s.getString());
-			System.out.println("------->");
-			for (AbstractSymbol el : tbl.getParents(s))
-				System.out.println(el.getString());
-			System.out.println("-------<");
-			
-			
-			
-		}
-		
-		System.out.println("Lub lista completa");
-		System.out.println(tbl.leastUpperBound(list));
-		
-		System.out.println("----lub main, b--->");
-		System.out.println(tbl.leastUpperBound(AbstractTable.idtable.addString("Main"), AbstractTable.idtable.addString("B")));
-		System.out.println("-------<");
-		
-		System.out.println("---lub a, io, object---->");
-		System.out.println(tbl.leastUpperBound(AbstractTable.idtable.addString("A"), AbstractTable.idtable.addString("IO"), AbstractTable.idtable.addString("Object")));
-		System.out.println("-------<");
-		
-		System.out.println("---lub a, b ---->");
-		System.out.println(tbl.leastUpperBound(AbstractTable.idtable.addString("A"), AbstractTable.idtable.addString("B")));
-		System.out.println("-------<");
-		
-		
-		AbstractSymbol[] list2 = {
-				AbstractTable.idtable.addString("A"),
-				AbstractTable.idtable.addString("B"),
-				AbstractTable.idtable.addString("C"),
-				AbstractTable.idtable.addString("D"),
-				AbstractTable.idtable.addString("E"),
-				AbstractTable.idtable.addString("F")
-		};
-		
-		System.out.println("Lub lista2 completa");
-		System.out.println(tbl.leastUpperBound(list2));
-		
-		
-		System.out.println("Lub A,B,C completa");
-		System.out.println(tbl.leastUpperBound(list2[0], list2[1], list2[2]));
-		
-		System.out.println("Lub A,E completa");
-		System.out.println(tbl.leastUpperBound(list2[0], list2[4]));
-		
-		System.out.println("Lub A, F completa");
-		System.out.println(tbl.leastUpperBound(list2[0], list2[5]));
-		
-		System.out.println("Lub D,E,F completa");
-		System.out.println(tbl.leastUpperBound(list2[3], list2[4], list2[5]));
-		
-		System.out.println("Lub A,B,C,D,E completa");
-		System.out.println(tbl.leastUpperBound(list2[3], list2[4], list2[0], list2[1], list2[2]));
-	}
-	}
-	
-}
-
-*/
-

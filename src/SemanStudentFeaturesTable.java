@@ -330,7 +330,6 @@ class FeaturesTable
 		for (Feature f : ancClazz.getFeaturesTable().getFeaturesList().values())
 		{
 			
-			System.out.println("Return type: "+TypeCheckerHelper.inferSelfType(f.getReturnType()));
 			Class_ featureClazz = cTbl.lookup(TypeCheckerHelper.inferSelfType(f.getReturnType()));
 			
 			symTab.addId(f.getFeatureName(), featureClazz);
