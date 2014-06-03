@@ -878,12 +878,13 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(assign obj) 
 			{
-				AbstractSymbol varName = (AbstractSymbol) obj.getData("name");
-				Expression expr = (Expression) obj.getData("expr");
+				AbstractSymbol varName = obj.getName();
+				AbstractSymbol exprType = (AbstractSymbol) obj.getData("expr");
 				
-				AbstractSymbol varType = (AbstractSymbol) semant_state.getScopeManager().lookup(varName);
-				AbstractSymbol exprType = (AbstractSymbol) semant_state.getScopeManager().lookup(expr.get_type());
-				
+				Class_ nameClass = (Class_) semant_state.getScopeManager().lookup(varName);  
+				AbstractSymbol varType = nameClass.getName();
+						
+						
 				//check if the identifier is declared
 				if( varType == null)
 				{
