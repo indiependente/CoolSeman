@@ -1,3 +1,4 @@
+import java.beans.FeatureDescriptor;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -325,14 +326,21 @@ class FeaturesVisitor extends DefaultVisitor
 	@Override
 	public void onVisitEnd() 
 	{
+		SemantErrorsManager err_mgr = SemantErrorsManager.getInstance();
 		ClassTable class_table = ClassTable.getInstance();
 		
 		class_table.lookup(TreeConstants.Object_).accept(this);
 //		class_table.lookup(TreeConstants.Bool).accept(this);
 //		class_table.lookup(TreeConstants.Int).accept(this);
 		class_table.lookup(TreeConstants.IO).accept(this);
+
+		if(!class_table.isClassRegistered(TreeConstants.Main))
+			err_mgr.fatal("Class Main is not defined.");
 		
-		SemantErrorsManager.getInstance().validate();
+		if(FeaturesTable.lookupMethod(TreeConstants.Main, TreeConstants.main_meth) == null)
+			err_mgr.semantError(class_table.lookup(TreeConstants.Main),"No 'main' method in class Main.");
+
+		err_mgr.validate();
 	}
 	
 	@Override
@@ -882,12 +890,13 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(assign obj) 
 			{
-				AbstractSymbol varName = (AbstractSymbol) obj.getData("name");
-				Expression expr = (Expression) obj.getData("expr");
+				AbstractSymbol varName = obj.getName();
+				AbstractSymbol exprType = (AbstractSymbol) obj.getData("expr");
 				
-				AbstractSymbol varType = (AbstractSymbol) semant_state.getScopeManager().lookup(varName);
-				AbstractSymbol exprType = (AbstractSymbol) semant_state.getScopeManager().lookup(expr.get_type());
-				
+				Class_ nameClass = (Class_) semant_state.getScopeManager().lookup(varName);  
+				AbstractSymbol varType = nameClass.getName();
+						
+						
 				//check if the identifier is declared
 				if( varType == null)
 				{
@@ -1014,21 +1023,19 @@ class TypeCheckerVisitor implements ITreeVisitor
 			SemantErrorsManager.getInstance().semantError(branch, "Identifier %s declared with type SELF_TYPE in case branch.", branch.getName());
 		}
 		
-		try
+		
+		//sposto scope e valide type del tipo della variabile (static) nella pre order
+		
+		try 
 		{
 			TypeCheckerHelper.validateType(branch_type_symbol);
-			TypeCheckerHelper.validateType(static_type_symbol);
 			TypeCheckerHelper.validateCast(branch, branch_type_symbol, static_type_symbol);
-		}
-		catch(Exception e)
+		} 
+		catch (SemanticException e) 
 		{
 		}
-		
-		
-		semant_state.getScopeManager().enterScope();
-		
-		semant_state.getScopeManager().addId(branch.getName(), ClassTable.getInstance().lookup(branch_type_symbol));
-		
+	
+		semant_state.getScopeManager().exitScope();
 		return branch_type_symbol;
 	}
 
@@ -1099,10 +1106,24 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPreOrder(Case branch) {
-		// TODO Auto-generated method stub
+		AbstractSymbol static_type_symbol = branch.getReturnType();
+		try
+		{
+			TypeCheckerHelper.validateType(static_type_symbol);
+		}
+		catch(Exception e)
+		{
+		}
+		
+		semant_state.getScopeManager().enterScope();
+		
+		semant_state.getScopeManager().addId(branch.getName(), ClassTable.getInstance().lookup(static_type_symbol));
+		
 		return null;
 	}
 
+	
+	
 	@Override
 	public Object onVisitPreOrder(Expression expr) {
 		return preorder_binder.execute(expr);
