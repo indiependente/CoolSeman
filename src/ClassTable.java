@@ -249,7 +249,18 @@ class ClassTable {
     		SemantErrorsManager.getInstance().semantError(impl, "Class %s was previously defined", cls);
     		return;
     	}
-    
+    	
+    	HashMap<AbstractSymbol, Object> basicClass = new HashMap<AbstractSymbol, Object>(){
+			{
+				put(TreeConstants.Int, true);
+				put(TreeConstants.Bool, true);
+				put(TreeConstants.Str, true);
+			}
+		};
+		
+		if(basicClass.containsKey(parent))
+				SemantErrorsManager.getInstance().fatal("Class "+cls+" cannot inherit class "+parent+".");
+		
 //    	System.out.println("registering " + cls + " inherits " + parent);
     	table.put(cls, impl);
     	dag.addVertex(cls);
