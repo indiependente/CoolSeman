@@ -308,7 +308,7 @@ class FeaturesVisitor extends DefaultVisitor
 		Class_ cls = SemantState.getInstance().getCurrentClass();
 		cls.getFeaturesTable().registerAttr(attr);
 		/*	TEST	*/
-		System.out.println(cls.getName() + ": "+ attr.name.str + ": " + cls.getFeaturesTable().isAttributeRegistered(attr.name));
+//		System.out.println(cls.getName() + ": "+ attr.name.str + ": " + cls.getFeaturesTable().isAttributeRegistered(attr.name));
 		/*	END TEST	*/
 		return null;
 	}
@@ -318,7 +318,7 @@ class FeaturesVisitor extends DefaultVisitor
 		Class_ cls = SemantState.getInstance().getCurrentClass();
 		cls.getFeaturesTable().registerMethod(meth);
 		/*	TEST	*/
-		System.out.println(cls.getName() + ": "+ meth.name.str + ": " + cls.getFeaturesTable().isMethodRegistered(meth.name));
+//		System.out.println(cls.getName() + ": "+ meth.name.str + ": " + cls.getFeaturesTable().isMethodRegistered(meth.name));
 		/*	END TEST	*/
 		return null;
 	}
@@ -333,6 +333,17 @@ class FeaturesVisitor extends DefaultVisitor
 //		class_table.lookup(TreeConstants.Bool).accept(this);
 //		class_table.lookup(TreeConstants.Int).accept(this);
 		class_table.lookup(TreeConstants.IO).accept(this);
+//		class_table.lookup(TreeConstants.Str).accept(this);
+		
+		class_table.lookup(TreeConstants.Str).accept(new DefaultVisitor()
+		{
+			@Override
+			public Object onVisitPostOrder(method meth) {
+				Class_ cls = SemantState.getInstance().getCurrentClass();
+				cls.getFeaturesTable().registerMethod(meth);
+				return null;
+			}
+		});
 
 		if(!class_table.isClassRegistered(TreeConstants.Main))
 			err_mgr.fatal("Class Main is not defined.");
@@ -940,7 +951,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		AbstractSymbol absym = (AbstractSymbol) mth.getData("dyn_return_type");
 		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym);
 		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
-		System.out.println("method " + dynamic_return_type_symbol + " " + static_return_type_symbol);
+//		System.out.println("method " + dynamic_return_type_symbol + " " + static_return_type_symbol);
 		try
 		{
 			TypeCheckerHelper.validateType(dynamic_return_type_symbol);

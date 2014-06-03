@@ -224,7 +224,7 @@ class ClassTable {
 			table.put(TreeConstants.Object_, Object_class);
 			
 			table.put(TreeConstants.No_type, null);
-	
+
 			// no longer needed
 			//registerClass(TreeConstants.Object_, Object_class, TreeConstants.No_class);
 			//registerClass(TreeConstants.IO, IO_class, TreeConstants.Object_);
@@ -344,9 +344,16 @@ class ClassTable {
 	 */
 	public void validateTable() 
 	{
+		HashMap<String, Boolean> excluded = new HashMap<String, Boolean>() {
+			{
+				put("_prim_slot", true);
+				put("Object", true);
+				put("_no_type", true);
+			}
+		};
 		for (AbstractSymbol sym : table.keySet())
 		{
-			if (sym.getString().equals("Object") || sym.getString().equals("_no_type"))
+			if (excluded.containsKey(sym.getString()))
 				continue;
 			Class_ cls = table.get(sym);
 			AbstractSymbol parent = cls.getParent();
