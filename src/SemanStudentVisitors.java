@@ -1,3 +1,4 @@
+import java.beans.FeatureDescriptor;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -328,6 +329,11 @@ class FeaturesVisitor extends DefaultVisitor
 		/**
 		 * Preparare la features table per i metodi built-in
 		 */
+		if(!ClassTable.getInstance().isClassRegistered(TreeConstants.Main))
+			SemantErrorsManager.getInstance().fatal("Class Main is not defined.");
+		
+		if(FeaturesTable.lookupMethod(TreeConstants.Main, TreeConstants.main_meth)==null)
+			SemantErrorsManager.getInstance().semantError(ClassTable.getInstance().lookup(TreeConstants.Main),"No 'main' method in class Main.");
 		SemantErrorsManager.getInstance().validate();
 	}
 	

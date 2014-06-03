@@ -131,4 +131,11 @@ class SemantErrorsManager
 		
 	}
 	
+	public void fatal(String msg){
+		System.err.println(msg);
+		System.err.println("Compilation halted due to static semantic errors.");
+		System.exit(1);
+		
+	}
+	
 }
