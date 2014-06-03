@@ -383,7 +383,23 @@ class TypeCheckerVisitor implements ITreeVisitor
 		{
 			@Override
 			public Object action(let obj) {
-				// TODO Auto-generated method stub
+				
+				AbstractSymbol letIdType = (AbstractSymbol)obj.getData("type_decl");
+
+				
+				AbstractSymbol static_type_symbol = obj.get_type();
+				try
+				{
+					TypeCheckerHelper.validateType(letIdType);
+				}
+				catch(Exception e)
+				{
+				}
+				
+				semant_state.getScopeManager().enterScope();
+				
+				semant_state.getScopeManager().addId(obj.identifier, obj);
+				
 				return null;
 			}	
 		});
@@ -710,6 +726,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 							+ letId + " does not conform to identifier's declared type " + initType);	
 				}
 				
+				semant_state.getScopeManager().exitScope();
+								
 				//set the return type to the block's return type
 				Expression ret_type = (Expression) obj.getData("body");
 				return obj.set_type(ret_type.get_type());
