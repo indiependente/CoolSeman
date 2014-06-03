@@ -1018,7 +1018,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType(absym);
 		AbstractSymbol static_type_symbol = branch.getReturnType();
 		
-		if(branch.getName().equals("self"))
+		if(branch.getName().equals(TreeConstants.self))
 		{
 			SemantErrorsManager.getInstance().semantError(branch, "'self' bound in 'case'.");
 		}

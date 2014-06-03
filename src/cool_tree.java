@@ -282,14 +282,18 @@ class Cases extends ListNode {
 		{
 			Case itm = (Case) e.nextElement();
 			AbstractSymbol toAdd = (AbstractSymbol)itm.accept(visitor);
-			if(branches.contains(toAdd))
+			
+			/* toAdd is always null in the first visit */
+			if(toAdd != null && branches.contains(toAdd))
 			{
-				SemantErrorsManager.getInstance().semantError(this, "Duplicate branch %s in case statement.", toAdd);
+				SemantErrorsManager.getInstance().semantError(itm, "Duplicate branch %s in case statement.", toAdd);
+				SemantErrorsManager.getInstance().validate(true);
 			}				
 			else
-			{
-				branches.add(toAdd);
-			}			
+				if (toAdd != null)
+				{
+					branches.add(toAdd);
+				}
 		}
 		
 		branches.toArray(type_list);
@@ -766,7 +770,8 @@ class branch extends Case {
 		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
 		decorate("branch_type", ret_expr);
-		return visitor.onVisitPostOrder(this);
+		AbstractSymbol returnsym =(AbstractSymbol) visitor.onVisitPostOrder(this);
+		return returnsym;
 	}
 
 	@Override
