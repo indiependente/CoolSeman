@@ -975,7 +975,14 @@ class TypeCheckerVisitor implements ITreeVisitor
 		{
 			TypeCheckerHelper.validateType(init_type_symbol);
 			TypeCheckerHelper.validateType(static_type_symbol);
-			TypeCheckerHelper.validateCast(itm, init_type_symbol, static_type_symbol);
+			//TypeCheckerHelper.validateCast(itm, init_type_symbol, static_type_symbol);
+			//check if the expression can be assigned to the variable
+			if(!ClassTable.getInstance().isSubClass(init_type_symbol, static_type_symbol))
+			{
+				semant_errors.semantError(itm,
+				"Inferred type %s of initialization of attribute %s does not conform to declared type %s.",
+				init_type_symbol, itm.getFeatureName(), static_type_symbol);
+			}
 		}
 		catch(Exception e)
 		{
