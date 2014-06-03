@@ -800,6 +800,10 @@ class assign extends Expression {
 		name = a1;
 		expr = a2;
 	}
+	
+	public AbstractSymbol getName() {
+		return name;
+	}
 
 	public TreeNode copy() {
 		return new assign(lineNumber, copy_AbstractSymbol(name), (Expression)expr.copy());
@@ -831,9 +835,9 @@ class assign extends Expression {
 	public Object accept(ITreeVisitor visitor) {
 
 		visitor.onVisitPreOrder(this);
-		decorate("name", name);
-		decorate("expr", expr);
-		expr.accept(visitor);
+		Object ret_expr = expr.accept(visitor);
+		decorate("expr", ret_expr);
+		
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
