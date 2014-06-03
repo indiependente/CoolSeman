@@ -325,9 +325,13 @@ class FeaturesVisitor extends DefaultVisitor
 	@Override
 	public void onVisitEnd() 
 	{
-		/**
-		 * Preparare la features table per i metodi built-in
-		 */
+		ClassTable class_table = ClassTable.getInstance();
+		
+		class_table.lookup(TreeConstants.Object_).accept(this);
+//		class_table.lookup(TreeConstants.Bool).accept(this);
+//		class_table.lookup(TreeConstants.Int).accept(this);
+		class_table.lookup(TreeConstants.IO).accept(this);
+		
 		SemantErrorsManager.getInstance().validate();
 	}
 	
@@ -1049,7 +1053,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public void onVisitEnd() {
-		SemantErrorsManager.getInstance().validate();
+		//SemantErrorsManager.getInstance().validate();
 		
 	}
 
