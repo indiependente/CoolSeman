@@ -125,7 +125,7 @@ class FeaturesTable
 			Formal f = (Formal) e.nextElement();
 			AbstractSymbol as = f.getTypeDecl();
 			/*	Declared type for Formal is SELF_TYPE*/
-			if (as.getString().equals("SELF_TYPE"))
+			if (as.equals(TreeConstants.SELF_TYPE))
 			{
 				SemantErrorsManager.getInstance()
 				.semantError(m,

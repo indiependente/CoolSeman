@@ -10,6 +10,7 @@
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.io.PrintStream;
 import java.util.Vector;
 
@@ -187,8 +188,10 @@ abstract class Expression extends TreeNode {
 	public Expression set_type(AbstractSymbol s) { type = s; return this; } 
 	public abstract void dump_with_types(PrintStream out, int n);
 	public void dump_type(PrintStream out, int n) {
-		if (type != null)
-		{ out.println(Utilities.pad(n) + ": " + type.getString()); }
+		Object rt = getData("rt");
+		AbstractSymbol tmp = (AbstractSymbol) ((rt != null) ? rt : type);
+		if (tmp != null)
+		{ out.println(Utilities.pad(n) + ": " + tmp.getString()); }
 		else
 		{ out.println(Utilities.pad(n) + ": _no_type"); }
 	}
@@ -245,7 +248,7 @@ abstract class Case extends TreeNode {
 	public abstract void dump_with_types(PrintStream out, int n);
 
 	public abstract AbstractSymbol getName();
-	public abstract AbstractSymbol getReturnType();
+	public abstract AbstractSymbol getTypeDecl();
 }
 
 
@@ -276,15 +279,17 @@ class Cases extends ListNode {
 	@Override
 	public Object accept(ITreeVisitor visitor) {
 		visitor.onVisitPreOrder(this);
-		AbstractSymbol[] type_list = new AbstractSymbol[getLength()];
-		ArrayList<AbstractSymbol> branches = new ArrayList<AbstractSymbol>();
+		AbstractSymbol[] lubArray = new AbstractSymbol[getLength()];
+		HashMap<AbstractSymbol, Boolean> branches = new HashMap<AbstractSymbol, Boolean>();
+		ArrayList<AbstractSymbol> lub = new ArrayList<AbstractSymbol>();
 		for (Enumeration e = getElements(); e.hasMoreElements(); )
 		{
 			Case itm = (Case) e.nextElement();
-			AbstractSymbol toAdd = (AbstractSymbol)itm.accept(visitor);
+			AbstractSymbol abs = (AbstractSymbol) itm.accept(visitor);
+			AbstractSymbol toAdd = itm.getTypeDecl();
 			
 			/* toAdd is always null in the first visit */
-			if(toAdd != null && branches.contains(toAdd))
+			if(toAdd != null && branches.containsKey(toAdd))
 			{
 				SemantErrorsManager.getInstance().semantError(itm, "Duplicate branch %s in case statement.", toAdd);
 				SemantErrorsManager.getInstance().validate(true);
@@ -292,13 +297,14 @@ class Cases extends ListNode {
 			else
 				if (toAdd != null)
 				{
-					branches.add(toAdd);
+					branches.put(toAdd, true);
+					lub.add(abs);
 				}
 		}
 		
-		branches.toArray(type_list);
+		lub.toArray(lubArray);
 		
-		decorate("type_list", type_list);
+		decorate("type_list", lubArray);
 		/*
 		 * calcolare il lub di tutti i branch e restituirlo
 		 */
@@ -780,7 +786,7 @@ class branch extends Case {
 	}
 
 	@Override
-	public AbstractSymbol getReturnType() {
+	public AbstractSymbol getTypeDecl() {
 		return type_decl;
 	}
 
@@ -1017,6 +1023,7 @@ class dispatch extends Expression {
 		visitor.onVisitPreOrder(this);
 		AbstractSymbol expr_type = (AbstractSymbol) expr.accept(visitor); 
 		actual.accept(visitor);
+//		System.out.println("expr type -> " + expr_type);
 		decorate("expr_type", expr_type); // save the expr type
 		visitor.onVisitPostOrder(this);
 		return get_type();
@@ -2316,6 +2323,7 @@ class object extends Expression {
 		 */
 		visitor.onVisitPreOrder(this);
 		visitor.onVisitPostOrder(this);
+//		System.out.println("object " +  get_type());
 		return get_type();
 	}
 

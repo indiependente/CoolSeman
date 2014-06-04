@@ -20,6 +20,9 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  */
 
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 
@@ -32,7 +35,9 @@ class Semant {
 	public static void main(String[] args) {
 		args = Flags.handleFlags(args);
 		try {
-			ASTLexer lexer = new ASTLexer(new InputStreamReader(System.in));
+//			InputStream stream = new FileInputStream(args[0]);
+//			ASTLexer lexer = new ASTLexer(new InputStreamReader(stream));
+			ASTLexer lexer = new ASTLexer(System.in);
 			AstCup parser = new AstCup(lexer);
 			Object result = parser.parse().value;
 			Program root = (Program) result;

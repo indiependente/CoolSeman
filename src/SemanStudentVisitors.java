@@ -430,6 +430,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 			{
 				if(obj.getName().equals(TreeConstants.self))
 				{
+//					System.out.println("self qui in object");
 					return obj.set_type(TreeConstants.SELF_TYPE);
 				}
 				Class_ type = (Class_) semant_state.getScopeManager().lookup(obj.getName());
@@ -790,7 +791,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				AbstractSymbol ret_then_exp = (AbstractSymbol) obj.getData("ret_then_exp");
 				AbstractSymbol ret_else_exp = (AbstractSymbol) obj.getData("ret_else_exp");
 				
-				if(!ClassTable.getInstance().isSubClass(ret_pred,TreeConstants.Bool))
+				if(!ClassTable.getInstance().isSubClass(ret_pred, TreeConstants.Bool))
 					{
 						semant_errors.semantError(obj, "Predicate of 'if' does not have type Bool.");
 						return obj.set_type(TreeConstants.Object_);
@@ -814,7 +815,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 					semant_errors.semantError(obj, "Undeclared identifier %s", ret_else_exp);
 				}
 				
-				AbstractSymbol lub = ClassTable.getInstance().leastUpperBound(ret_then_exp,ret_else_exp);
+				AbstractSymbol lub = ClassTable.getInstance().leastUpperBound(ret_then_exp, ret_else_exp);
 				return obj.set_type(lub);
 			}
 	
@@ -828,10 +829,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 			{
 				ClassTable cTbl = ClassTable.getInstance();
 				
-				Class_ myCls = cTbl.lookup((AbstractSymbol)obj.getData("expr_type")); // the expr class
+				Class_ myCls = cTbl.lookup(TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("expr_type"))); // the expr class, it's self
 				// it should never enter in this if statement
 				if (myCls == null)	// if the dispatch caller class is not defined
 				{
+//					System.out.println("myCls is null " + myCls.getName());
 					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
 				
@@ -839,6 +841,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				boolean isValid = FeaturesTable.validateDispatch(myCls.getName(), obj);
 				if (!isValid)
 				{
+//					System.out.println("isValid not " + myCls.getName() + " " + obj.getName());
 					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
 				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj.getName());
@@ -846,8 +849,10 @@ class TypeCheckerVisitor implements ITreeVisitor
 				{
 					semant_errors.semantError(obj, "Dispatch to undefined method %s.", obj.getName());
 				}
-				
-				return obj.set_type(meth.getReturnType());
+//				System.out.println("aad " + meth.getReturnType() );
+				obj.decorate("rt", meth.getReturnType());
+				return obj.set_type(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
+//				return obj.set_type(meth.getReturnType());
 			}
 	
 		});
@@ -898,7 +903,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 					semant_errors.semantError(obj, "Static dispatch to undefined method %s.", obj.getName());
 				}
 				
-				return obj.set_type(meth.getReturnType());
+				obj.decorate("rt", meth.getReturnType());
+				return obj.set_type(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
 
 			}
 	
@@ -958,8 +964,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 */
 	public Object onVisitPostOrder(method mth) {
 		AbstractSymbol absym = (AbstractSymbol) mth.getData("dyn_return_type");
-		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym);
-		AbstractSymbol static_return_type_symbol = ((Class_) semant_state.getScopeManager().lookup(mth.getName())).getName(); //TypeCheckerHelper.inferSelfType(mth.getReturnType());
+		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym, semant_state.getCurrentClass().getName());
+		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
 		try
 		{
 			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
@@ -1034,18 +1040,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 	public Object onVisitPostOrder(Case branch) {
 		AbstractSymbol absym = (AbstractSymbol) branch.getData("branch_type");
 		AbstractSymbol branch_type_symbol = TypeCheckerHelper.inferSelfType(absym);
-		AbstractSymbol static_type_symbol = branch.getReturnType();
-		
-		if(branch.getName().equals(TreeConstants.self))
-		{
-			SemantErrorsManager.getInstance().semantError(branch, "'self' bound in 'case'.");
-		}
+//		AbstractSymbol static_type_symbol = branch.getTypeDecl();
 		
 		
-		if(static_type_symbol.equals(TreeConstants.SELF_TYPE))
-		{
-			SemantErrorsManager.getInstance().semantError(branch, "Identifier %s declared with type SELF_TYPE in case branch.", branch.getName());
-		}
 		
 		
 		//sposto scope e valide type del tipo della variabile (static) nella pre order
@@ -1053,7 +1050,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 		try 
 		{
 			TypeCheckerHelper.validateType(branch_type_symbol);
-			TypeCheckerHelper.validateCast(branch, branch_type_symbol, static_type_symbol);
+//			TypeCheckerHelper.validateCast(branch, branch_type_symbol, static_type_symbol);
 		} 
 		catch (SemanticException e) 
 		{
@@ -1067,7 +1064,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPostOrder(Expression expr) 
 	{
-		return postorder_binder.execute(expr);
+		return postorder_binder.execute(expr); // it returns the expr
 	}
 
 	/**
@@ -1127,7 +1124,15 @@ class TypeCheckerVisitor implements ITreeVisitor
 
 	@Override
 	public Object onVisitPreOrder(Case branch) {
-		AbstractSymbol static_type_symbol = branch.getReturnType();
+		AbstractSymbol static_type_symbol = branch.getTypeDecl();
+		if(branch.getName().equals(TreeConstants.self))
+		{
+			SemantErrorsManager.getInstance().semantError(branch, "'self' bound in 'case'.");
+		}
+		if(static_type_symbol.equals(TreeConstants.SELF_TYPE))
+		{
+			SemantErrorsManager.getInstance().semantError(branch, "Identifier %s declared with type SELF_TYPE in case branch.", branch.getName());
+		}
 		try
 		{
 			TypeCheckerHelper.validateType(static_type_symbol);
