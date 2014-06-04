@@ -1334,6 +1334,22 @@ class let extends Expression {
 		body = a4;
 	}
 	
+	public AbstractSymbol getIdentifier() {
+		return identifier;
+	}
+
+	public AbstractSymbol getTypeDecl() {
+		return type_decl;
+	}
+
+	public Expression getInit() {
+		return init;
+	}
+
+	public Expression getBody() {
+		return body;
+	}
+
 	public TreeNode copy() {
 		return new let(lineNumber, copy_AbstractSymbol(identifier), copy_AbstractSymbol(type_decl), (Expression)init.copy(), (Expression)body.copy());
 	}
@@ -1367,16 +1383,14 @@ class let extends Expression {
 	@Override
 	public Object accept(ITreeVisitor visitor) {
 
+		Object ret_init = init.accept(visitor);
+		decorate("ret_init", ret_init);
+
 		visitor.onVisitPreOrder(this);
 		
-		decorate("identifier",identifier );
-		decorate("type_decl",type_decl );
-		decorate("init",init);
-		decorate("body",body );
-		
-		Object ret_init = init.accept(visitor);
 		Object ret_body = body.accept(visitor);
 		
+		decorate("ret_body", ret_body );
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}

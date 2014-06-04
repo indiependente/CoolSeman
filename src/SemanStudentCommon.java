@@ -45,7 +45,8 @@ class TypeCheckerHelper
 	{
 		if (!(child.equals(parent) || class_table.isSubClass(child, parent)))
 		{
-			semant_error.semantError(node, "Invalid cast: can't cast type %s to type %s", child, parent);	
+			if (node != null)
+				semant_error.semantError(node, "Invalid cast: can't cast type %s to type %s", child, parent);	
 			throw new SemanticException();
 		}	
 	}
@@ -63,9 +64,17 @@ class TypeCheckerHelper
 	 * If it's a SELF_TYPE then it returns the current class
 	 */
 	public static AbstractSymbol inferSelfType(AbstractSymbol returnType) {
-		if (returnType.getString().equals("SELF_TYPE"))
+		if (returnType.equals(TreeConstants.SELF_TYPE))
 		{
 			return semant_state.getCurrentClass().getName();
+		}
+		return returnType;
+	}
+	
+	public static AbstractSymbol inferSelfType(AbstractSymbol returnType, AbstractSymbol default_type) {
+		if (returnType.equals(TreeConstants.SELF_TYPE))
+		{
+			return default_type;
 		}
 		return returnType;
 	}

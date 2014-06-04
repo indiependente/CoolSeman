@@ -384,21 +384,40 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(let obj) {
 				
-				AbstractSymbol letIdType = (AbstractSymbol)obj.getData("type_decl");
-
 				
-				AbstractSymbol static_type_symbol = obj.get_type();
-				try
+				AbstractSymbol letIdType = obj.getTypeDecl();
+				AbstractSymbol letId = obj.getIdentifier();
+				
+				if(letId.equals(TreeConstants.self))
 				{
+					//'self' cannot be bound in a 'let' expression.
+					semant_errors.semantError(obj, "'self' cannot be bound in a 'let' expression.");	
+				}
+				
+				//check id the identifier class in the let stmt is already defined
+				try {
 					TypeCheckerHelper.validateType(letIdType);
+				} catch (SemanticException e) {
+					semant_errors.semantError(obj, "Class "+ letIdType + 
+							" of let-bound identifier " + letId + " is undefined.");	
 				}
-				catch(Exception e)
+
+				//check if the init type is conform to the declared objectId type in the let stmt
+				AbstractSymbol initType = (AbstractSymbol) obj.getData("ret_init");
+				if (!initType.equals(TreeConstants.No_type))
 				{
+					try {
+						TypeCheckerHelper.validateType(initType);
+						TypeCheckerHelper.validateCast(null, letIdType, initType);
+					} catch (SemanticException e) {
+						//Inferred type Int of initialization of x does not conform to identifier's declared type String.
+						semant_errors.semantError(obj, "Inferred type " + letIdType + " of initialization of "
+								+ letId + " does not conform to identifier's declared type " + initType);	
+					}
 				}
-				
 				semant_state.getScopeManager().enterScope();
 				
-				semant_state.getScopeManager().addId(obj.identifier, obj);
+				semant_state.getScopeManager().addId(obj.getIdentifier(), ClassTable.getInstance().lookup(letIdType));
 				
 				return null;
 			}	
@@ -698,39 +717,13 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(let obj) 
 			{
-				//check the identifier name in the let stmt: it must not be 'self'
-				AbstractSymbol letId = (AbstractSymbol)obj.getData("identifier");
-				if(letId.getString().equals("self"))
-				{
-					//'self' cannot be bound in a 'let' expression.
-					semant_errors.semantError(obj, "'self' cannot be bound in a 'let' expression.");	
-				}
 				
-				//check id the identifier class in the let stmt is already defined
-				AbstractSymbol letIdType = (AbstractSymbol)obj.getData("type_decl");
-				try {
-					TypeCheckerHelper.validateType(letIdType);
-				} catch (SemanticException e) {
-					semant_errors.semantError(obj, "Class "+ letIdType + 
-							" of let-bound identifier " + letId + " is undefined.");	
-				}
-				
-				//check if the init type is conform to the declared objectId type in the let stmt
-				AbstractSymbol initType = (AbstractSymbol) obj.getData("init");
-				try {
-					TypeCheckerHelper.validateType(initType);
-					TypeCheckerHelper.typeMatchAny(letIdType, initType);
-				} catch (SemanticException e) {
-					//Inferred type Int of initialization of x does not conform to identifier's declared type String.
-					semant_errors.semantError(obj, "Inferred type " + letIdType + " of initialization of "
-							+ letId + " does not conform to identifier's declared type " + initType);	
-				}
 				
 				semant_state.getScopeManager().exitScope();
 								
 				//set the return type to the block's return type
-				Expression ret_type = (Expression) obj.getData("body");
-				return obj.set_type(ret_type.get_type());
+				AbstractSymbol ret_type = (AbstractSymbol) obj.getData("ret_body");
+				return obj.set_type(ret_type);
 			}
 	
 		});
@@ -931,7 +924,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				}
 				
 				//check the name of the identifier
-				if(varName.toString().equals("self"))
+				if(varName.equals(TreeConstants.self))
 				{			
 					semant_errors.semantError(obj, "Type " + exprType +
 							" of assigned expression does not conform to declared type " +
@@ -966,7 +959,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	public Object onVisitPostOrder(method mth) {
 		AbstractSymbol absym = (AbstractSymbol) mth.getData("dyn_return_type");
 		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym);
-		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
+		AbstractSymbol static_return_type_symbol = ((Class_) semant_state.getScopeManager().lookup(mth.getName())).getName(); //TypeCheckerHelper.inferSelfType(mth.getReturnType());
 		try
 		{
 			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
