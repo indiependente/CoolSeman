@@ -279,14 +279,34 @@ class Cases extends ListNode {
 	@Override
 	public Object accept(ITreeVisitor visitor) {
 		visitor.onVisitPreOrder(this);
+		
 		AbstractSymbol[] lubArray = new AbstractSymbol[getLength()];
+		AbstractSymbol[] lubRTArray = new AbstractSymbol[getLength()];
+
+		
 		HashMap<AbstractSymbol, Boolean> branches = new HashMap<AbstractSymbol, Boolean>();
+		
 		ArrayList<AbstractSymbol> lub = new ArrayList<AbstractSymbol>();
+		ArrayList<AbstractSymbol> lubRT = new ArrayList<AbstractSymbol>();
+		
+		boolean containsSelfType = false, validRT = false;
+
 		for (Enumeration e = getElements(); e.hasMoreElements(); )
 		{
 			Case itm = (Case) e.nextElement();
 			AbstractSymbol abs = (AbstractSymbol) itm.accept(visitor);
 			AbstractSymbol toAdd = itm.getTypeDecl();
+			
+			AbstractSymbol rt = (AbstractSymbol) itm.getData("rt");
+			
+			if (rt != null) 
+			{
+				validRT = true;
+				if (rt.equals(TreeConstants.SELF_TYPE))
+					containsSelfType = true;
+			}
+			
+			lubRT.add(rt);
 			
 			/* toAdd is always null in the first visit */
 			if(toAdd != null && branches.containsKey(toAdd))
@@ -294,15 +314,20 @@ class Cases extends ListNode {
 				SemantErrorsManager.getInstance().semantError(itm, "Duplicate branch %s in case statement.", toAdd);
 				SemantErrorsManager.getInstance().validate(true);
 			}				
-			else
-				if (toAdd != null)
-				{
-					branches.put(toAdd, true);
-					lub.add(abs);
-				}
+			else if (toAdd != null)
+			{
+				branches.put(toAdd, true);
+				lub.add(abs);
+			}
 		}
 		
 		lub.toArray(lubArray);
+		lubRT.toArray(lubRTArray);
+		
+		if (containsSelfType)
+			decorate("rt", TreeConstants.SELF_TYPE);
+		else
+			decorate("rt", (validRT) ? ClassTable.getInstance().leastUpperBound(lubRTArray) : null);
 		
 		decorate("type_list", lubArray);
 		/*
@@ -776,7 +801,9 @@ class branch extends Case {
 		visitor.onVisitPreOrder(this);
 		Object ret_expr = expr.accept(visitor);
 		decorate("branch_type", ret_expr);
+		
 		AbstractSymbol returnsym =(AbstractSymbol) visitor.onVisitPostOrder(this);
+		decorate("rt", ret_expr);
 		return returnsym;
 	}
 
@@ -1250,6 +1277,7 @@ class typcase extends Expression {
 		Object ret_expr = expr.accept(visitor);
 		Object ret_cases = cases.accept(visitor); // this is the least upper bound
 		decorate("lub", ret_cases);
+		decorate("rt", cases.getData("rt"));
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
@@ -1308,7 +1336,9 @@ class block extends Expression {
 		visitor.onVisitPreOrder(this);
 		Object ret_block = body.accept(visitor);
 		decorate("ret_block", ret_block);
+		
 		visitor.onVisitPostOrder(this);
+		decorate("rt", body.getData("rt"));
 		return get_type();
 	}
 

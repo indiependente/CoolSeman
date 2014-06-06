@@ -788,8 +788,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(cond obj) 
 			{
 				AbstractSymbol ret_pred = (AbstractSymbol) obj.getData("ret_pred");
-				AbstractSymbol ret_then_exp = (AbstractSymbol) obj.getData("ret_then_exp");
-				AbstractSymbol ret_else_exp = (AbstractSymbol) obj.getData("ret_else_exp");
+				AbstractSymbol ret_then_exp = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("ret_then_exp"));
+				AbstractSymbol ret_else_exp = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("ret_else_exp"));
 				
 				if(!ClassTable.getInstance().isSubClass(ret_pred, TreeConstants.Bool))
 					{
@@ -804,6 +804,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				catch (SemanticException e) 
 				{
 					semant_errors.semantError(obj, "Undeclared identifier %s", ret_then_exp);
+					return null;
 				}
 				
 				try 
@@ -813,6 +814,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				catch (SemanticException e) 
 				{
 					semant_errors.semantError(obj, "Undeclared identifier %s", ret_else_exp);
+					return null;
 				}
 				
 				AbstractSymbol lub = ClassTable.getInstance().leastUpperBound(ret_then_exp, ret_else_exp);
@@ -849,9 +851,15 @@ class TypeCheckerVisitor implements ITreeVisitor
 				{
 					semant_errors.semantError(obj, "Dispatch to undefined method %s.", obj.getName());
 				}
-//				System.out.println("aad " + meth.getReturnType() );
-				obj.decorate("rt", meth.getReturnType());
-				return obj.set_type(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
+				System.out.println(obj.getLineNumber() + " aad " + meth.getReturnType() + " " + obj.getExpr().get_type() );
+				System.out.println(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
+				
+				if (obj.getExpr().equals(TreeConstants.self) && meth.getReturnType().equals(TreeConstants.SELF_TYPE))
+				{
+					obj.decorate("rt", meth.getReturnType());
+				}
+				
+				return obj.set_type(TypeCheckerHelper.inferSelfType(meth.getReturnType(), obj.getExpr().get_type()));
 //				return obj.set_type(meth.getReturnType());
 			}
 	
@@ -963,7 +971,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 	 * this method analyses if a method node is semantically correct 
 	 */
 	public Object onVisitPostOrder(method mth) {
-		AbstractSymbol absym = (AbstractSymbol) mth.getData("dyn_return_type");
+		AbstractSymbol absym = (AbstractSymbol) ((mth.getExpr().getData("rt") != null) ? mth.getExpr().getData("rt") : mth.getData("dyn_return_type"));
 		AbstractSymbol dynamic_return_type_symbol = TypeCheckerHelper.inferSelfType(absym, semant_state.getCurrentClass().getName());
 		AbstractSymbol static_return_type_symbol = TypeCheckerHelper.inferSelfType(mth.getReturnType());
 		try
@@ -1075,7 +1083,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 		int size = vect.size();
 		Object ret = null;
 		if (size > 0)
-			ret = ((Expression) (vect.elementAt(size - 1))).get_type();
+		{
+			Expression expr = (Expression) vect.elementAt(size - 1);
+			expressions.decorate("rt", expr.getData("rt"));
+			ret = expr.get_type();
+		}
 		return ret;
 	}
 
