@@ -289,9 +289,10 @@ class Cases extends ListNode {
 		ArrayList<AbstractSymbol> lub = new ArrayList<AbstractSymbol>();
 		ArrayList<AbstractSymbol> lubRT = new ArrayList<AbstractSymbol>();
 		
-		boolean containsSelfType = false, validRT = false;
-
-		for (Enumeration e = getElements(); e.hasMoreElements(); )
+		boolean validRT = false, containsNULL = false;
+		int howManySelfType = 0, size = 0;
+		
+		for (Enumeration e = getElements(); e.hasMoreElements(); size++)
 		{
 			Case itm = (Case) e.nextElement();
 			AbstractSymbol abs = (AbstractSymbol) itm.accept(visitor);
@@ -301,10 +302,12 @@ class Cases extends ListNode {
 			
 			if (rt != null) 
 			{
-				validRT = true;
+				//validRT = true;
 				if (rt.equals(TreeConstants.SELF_TYPE))
-					containsSelfType = true;
+					howManySelfType++;
 			}
+			else
+				containsNULL = true;
 			
 			lubRT.add(rt);
 			
@@ -323,12 +326,16 @@ class Cases extends ListNode {
 		
 		lub.toArray(lubArray);
 		lubRT.toArray(lubRTArray);
-		
-		if (containsSelfType)
+
+if(!containsNULL)
+		if (howManySelfType == size)
 			decorate("rt", TreeConstants.SELF_TYPE);
 		else
-			decorate("rt", (validRT) ? ClassTable.getInstance().leastUpperBound(lubRTArray) : null);
-		
+			if (howManySelfType == 0)
+				decorate("rt", ClassTable.getInstance().leastUpperBound(lubRTArray));
+			else
+				decorate("rt", ClassTable.getInstance().leastUpperBound(TypeCheckerHelper.inferSelfType(lubRTArray)));
+
 		decorate("type_list", lubArray);
 		/*
 		 * calcolare il lub di tutti i branch e restituirlo

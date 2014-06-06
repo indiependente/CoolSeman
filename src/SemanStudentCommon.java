@@ -88,6 +88,15 @@ class TypeCheckerHelper
 		}
 		throw new SemanticException();
 	}
+
+	public static AbstractSymbol[] inferSelfType(AbstractSymbol... rtArray) {
+		AbstractSymbol[] inferArray = new AbstractSymbol[rtArray.length];
+		for(int i=0; i<rtArray.length; i++)
+		{
+			inferArray[i] = inferSelfType(rtArray[i]);
+		}
+		return inferArray;
+	}
 	
 }
 
