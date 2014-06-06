@@ -788,36 +788,44 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(cond obj) 
 			{
 				AbstractSymbol ret_pred = (AbstractSymbol) obj.getData("ret_pred");
-				AbstractSymbol ret_then_exp = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("ret_then_exp"));
-				AbstractSymbol ret_else_exp = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("ret_else_exp"));
+				AbstractSymbol ret_then_exp = (AbstractSymbol) obj.getData("ret_then_exp");
+				AbstractSymbol ret_else_exp = (AbstractSymbol) obj.getData("ret_else_exp");
 				
-				if(!ClassTable.getInstance().isSubClass(ret_pred, TreeConstants.Bool))
-					{
-						semant_errors.semantError(obj, "Predicate of 'if' does not have type Bool.");
-						return obj.set_type(TreeConstants.Object_);
-					}
+				AbstractSymbol inf_ret_then_exp = TypeCheckerHelper.inferSelfType(ret_then_exp);
+				AbstractSymbol inf_ret_else_exp = TypeCheckerHelper.inferSelfType(ret_else_exp);
+				
+				if (ret_then_exp.equals(TreeConstants.SELF_TYPE) && ret_else_exp.equals(TreeConstants.SELF_TYPE))
+				{
+					obj.decorate("rt", TreeConstants.SELF_TYPE);
+				}
+				
+				if (!ClassTable.getInstance().isSubClass(ret_pred, TreeConstants.Bool))
+				{
+					semant_errors.semantError(obj, "Predicate of 'if' does not have type Bool.");
+					return obj.set_type(TreeConstants.Object_);
+				}
 				
 				try 
 				{
-					TypeCheckerHelper.validateType(ret_then_exp);
+					TypeCheckerHelper.validateType(inf_ret_then_exp);
 				} 
 				catch (SemanticException e) 
 				{
-					semant_errors.semantError(obj, "Undeclared identifier %s", ret_then_exp);
+					semant_errors.semantError(obj, "Undeclared identifier %s", inf_ret_then_exp);
 					return null;
 				}
 				
 				try 
 				{
-					TypeCheckerHelper.validateType(ret_else_exp);
+					TypeCheckerHelper.validateType(inf_ret_else_exp);
 				} 
 				catch (SemanticException e) 
 				{
-					semant_errors.semantError(obj, "Undeclared identifier %s", ret_else_exp);
+					semant_errors.semantError(obj, "Undeclared identifier %s", inf_ret_else_exp);
 					return null;
 				}
 				
-				AbstractSymbol lub = ClassTable.getInstance().leastUpperBound(ret_then_exp, ret_else_exp);
+				AbstractSymbol lub = ClassTable.getInstance().leastUpperBound(inf_ret_then_exp, inf_ret_else_exp);
 				return obj.set_type(lub);
 			}
 	
@@ -851,8 +859,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 				{
 					semant_errors.semantError(obj, "Dispatch to undefined method %s.", obj.getName());
 				}
-				System.out.println(obj.getLineNumber() + " aad " + meth.getReturnType() + " " + obj.getExpr().get_type() );
-				System.out.println(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
+//				System.out.println(obj.getLineNumber() + " aad " + meth.getReturnType() + " " + obj.getExpr().get_type() );
+//				System.out.println(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
 				
 				if (obj.getExpr().equals(TreeConstants.self) && meth.getReturnType().equals(TreeConstants.SELF_TYPE))
 				{
@@ -911,7 +919,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 					semant_errors.semantError(obj, "Static dispatch to undefined method %s.", obj.getName());
 				}
 				
-				obj.decorate("rt", meth.getReturnType());
+				if (obj.getExpr().equals(TreeConstants.self) && meth.getReturnType().equals(TreeConstants.SELF_TYPE))
+				{
+					obj.decorate("rt", meth.getReturnType());
+				}
+				
 				return obj.set_type(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
 
 			}
