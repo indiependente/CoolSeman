@@ -552,17 +552,28 @@ class TypeCheckerVisitor implements ITreeVisitor
 				AbstractSymbol left_type = (AbstractSymbol) obj.getData("left");
 				AbstractSymbol right_type = (AbstractSymbol) obj.getData("right");
 				
+				AbstractSymbol inf_left_type = TypeCheckerHelper.inferSelfType(left_type);
+				AbstractSymbol inf_right_type = TypeCheckerHelper.inferSelfType(right_type);
+				
 				try
 				{
-					TypeCheckerHelper.validateType(left_type);
-					TypeCheckerHelper.validateType(right_type);
-					TypeCheckerHelper.typeMatchAny(left_type, TreeConstants.Int, 
-							TreeConstants.Bool, TreeConstants.Str);
-					TypeCheckerHelper.typeMatchAny(right_type, TreeConstants.Int,
-							TreeConstants.Bool, TreeConstants.Str);
-					TypeCheckerHelper.typeMatch(left_type, right_type);
+					TypeCheckerHelper.validateType(inf_left_type);
+					TypeCheckerHelper.validateType(inf_right_type);
+					
+					// special case for ptr check
+					
+					boolean leftPtrCheck = !(TypeCheckerHelper.typeMatchAny(inf_left_type, TreeConstants.Int, 
+							TreeConstants.Bool, TreeConstants.Str));
+					boolean rightPtrCheck = !(TypeCheckerHelper.typeMatchAny(inf_right_type, TreeConstants.Int,
+							TreeConstants.Bool, TreeConstants.Str));
+					
+					if (!(leftPtrCheck && rightPtrCheck))
+					{
+						TypeCheckerHelper.typeMatch(inf_left_type, inf_right_type);
+					}
 				}
-				catch (SemanticException e) {
+				catch (SemanticException e)
+				{
 					semant_errors.semantError(obj, "Illegal comparison with a basic type");	
 				}
 				

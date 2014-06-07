@@ -256,7 +256,7 @@ class FeaturesTable
 		AbstractSymbol dName = d.getName();
 		method meth = lookupMethod(dName);
 		
-		if(meth == null)
+		if (meth == null)
 			return false;
 		
 		Expressions actuals = d.getActual();
@@ -366,18 +366,21 @@ class FeaturesTable
 	 */
 	private boolean validateActualsFormals(Enumeration eForm, Enumeration eAct)
 	{
-		while(eForm.hasMoreElements() && eAct.hasMoreElements())
+		Class_ currentClass = SemantState.getInstance().getCurrentClass();
+		while (eForm.hasMoreElements() && eAct.hasMoreElements())
 		{
 			Expression actualParam = (Expression) eAct.nextElement();
 			Formal formalParam = (Formal) eForm.nextElement();
 			//if the actual param is subclass of the formal param then continues, else exit
-			if(!ClassTable.getInstance().isSubClass(actualParam.get_type(), formalParam.getTypeDecl()))
+			if (!ClassTable.getInstance().isSubClass(
+					TypeCheckerHelper.inferSelfType(actualParam.get_type(), currentClass.getName()),
+					TypeCheckerHelper.inferSelfType(formalParam.getTypeDecl(), owner.getName())))
 				return false;
 		}
 		
 		//if the dispatch uses more params than the params needed, one of the two lists has still some elements
 		//so the invocation is wrong
-		if(eForm.hasMoreElements() || eAct.hasMoreElements() )
+		if (eForm.hasMoreElements() || eAct.hasMoreElements() )
 			return false;
 		
 		return true;

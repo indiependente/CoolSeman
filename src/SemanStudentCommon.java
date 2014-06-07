@@ -64,30 +64,23 @@ class TypeCheckerHelper
 	 * If it's a SELF_TYPE then it returns the current class
 	 */
 	public static AbstractSymbol inferSelfType(AbstractSymbol returnType) {
-		if (returnType.equals(TreeConstants.SELF_TYPE))
-		{
-			return semant_state.getCurrentClass().getName();
-		}
-		return returnType;
+		return inferSelfType(returnType, semant_state.getCurrentClass().getName());
 	}
 	
 	public static AbstractSymbol inferSelfType(AbstractSymbol returnType, AbstractSymbol default_type) {
-		if (returnType.equals(TreeConstants.SELF_TYPE))
-		{
-			return default_type;
-		}
-		return returnType;
+		return (returnType.equals(TreeConstants.SELF_TYPE)) ? default_type : returnType;
 	}
 
-	public static void typeMatchAny(AbstractSymbol type, AbstractSymbol... symbols) throws SemanticException 
+	public static boolean typeMatchAny(AbstractSymbol type, AbstractSymbol... symbols) 
 	{
 		for (AbstractSymbol sym : symbols)
 		{
 			if (type.equals(sym)) 
-				return;
+				return true;
 		}
-		throw new SemanticException();
+		return false;
 	}
+	
 
 	public static AbstractSymbol[] inferSelfType(AbstractSymbol... rtArray) {
 		AbstractSymbol[] inferArray = new AbstractSymbol[rtArray.length];

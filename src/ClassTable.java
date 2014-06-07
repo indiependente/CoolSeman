@@ -423,7 +423,14 @@ class ClassTable {
     	AbstractSymbol parent = sym;
     	while (!parent.equals(object))
     	{
-    		parent = table.get(parent).getParent();
+    		if (parent == null) 
+    			throw new RuntimeException("parent is null on " + sym);
+    		Class_ cls = table.get(parent);
+    		if(cls == null)
+    			throw new RuntimeException("cls is null on " + sym);
+    		parent = cls.getParent();
+    		if(parent == null) 
+    			throw new RuntimeException("parent is again null on " + sym + " and " + cls.getName());
     		ret.add(parent);
     	}
     	return ret;
@@ -502,6 +509,7 @@ class ClassTable {
      */
     public boolean isSubClass(AbstractSymbol child, AbstractSymbol parent)
     {
+    	assert(child != null && parent != null);
     	if (child.equals(parent))
     		return true;
     	ArrayList<AbstractSymbol> list = getParents(child);
