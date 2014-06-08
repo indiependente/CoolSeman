@@ -55,7 +55,8 @@ class ClassTable {
      * What about a more meaningful name? xD
      * classRegister sounds nice to me :)
      */
-    private HashMap<AbstractSymbol, Class_> table; 
+    private HashMap<AbstractSymbol, Class_> table;
+    
 
     /** Creates data structures representing basic Cool classes (Object,
      * IO, Int, Bool, String).  Please note: as is this method does not
@@ -222,7 +223,7 @@ class ClassTable {
 			dag.addVertex(TreeConstants.Object_);
 			table.put(TreeConstants.Object_, Object_class);
 			
-			table.put(TreeConstants.No_type, null);
+			table.put(TreeConstants.No_type, null);			
 
 			// no longer needed
 			//registerClass(TreeConstants.Object_, Object_class, TreeConstants.No_class);
@@ -258,8 +259,8 @@ class ClassTable {
 			}
 		};
 		
-		if(basicClass.containsKey(parent))
-				SemantErrorsManager.getInstance().fatal("Class "+cls+" cannot inherit class "+parent+".");
+		if (basicClass.containsKey(parent))
+			SemantErrorsManager.getInstance().fatal("Class " + cls + " cannot inherit class " + parent +".");
 		
 //    	System.out.println("registering " + cls + " inherits " + parent);
     	table.put(cls, impl);
@@ -308,7 +309,6 @@ class ClassTable {
 		table = new HashMap<AbstractSymbol, Class_>();
 		dag = new DefaultDirectedGraph<AbstractSymbol, DefaultEdge>(DefaultEdge.class);
 	
-		
 	
     }
 
@@ -369,7 +369,7 @@ class ClassTable {
 			AbstractSymbol parent = cls.getParent();
 			if (!table.containsKey(parent))
 			{
-				SemantErrorsManager.getInstance().semantError(cls, "invalid parent");
+				SemantErrorsManager.getInstance().semantError(cls, "Class %s inherits from an undefined class %s.", sym, parent);
 			}
 			else
 			{
@@ -510,6 +510,14 @@ class ClassTable {
     public boolean isSubClass(AbstractSymbol child, AbstractSymbol parent)
     {
     	assert(child != null && parent != null);
+    	
+    	// primitive types are not subclasses of Object
+    	
+    	if (TypeCheckerHelper.typeMatchAny(child, TreeConstants.Str, TreeConstants.Int, TreeConstants.Bool))
+    	{
+    		return child.equals(parent);
+    	}
+    	
     	if (child.equals(parent))
     		return true;
     	ArrayList<AbstractSymbol> list = getParents(child);

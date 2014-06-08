@@ -8,6 +8,10 @@ class SemanticException extends Exception
 	{
 		super();
 	}
+	public SemanticException(String msg, Object... args)
+	{
+		super(String.format(msg, args));
+	}
 }
 
 /**

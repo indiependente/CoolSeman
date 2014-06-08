@@ -265,7 +265,7 @@ class FeaturesTable
 		Enumeration eForm = formals.getElements();
 		Enumeration eAct = actuals.getElements();
 				
-		return validateActualsFormals(eForm, eAct);
+		return validateActualsFormals(d, dName, eForm, eAct);
 	}
 	
 	public boolean validateDispatch(static_dispatch d){
@@ -281,7 +281,7 @@ class FeaturesTable
 		Enumeration eForm = formals.getElements();
 		Enumeration eAct = actuals.getElements();
 				
-		return validateActualsFormals(eForm, eAct);
+		return validateActualsFormals(d, dName, eForm, eAct);
 	}
 	
 	/**
@@ -365,7 +365,7 @@ class FeaturesTable
 	 * @param eAct	List of actuals params
 	 * @return True if the actuals' types are same or subclass of formals' types.
 	 */
-	private boolean validateActualsFormals(Enumeration eForm, Enumeration eAct)
+	private boolean validateActualsFormals(Expression node, AbstractSymbol methodName, Enumeration eForm, Enumeration eAct)
 	{
 		Class_ currentClass = SemantState.getInstance().getCurrentClass();
 		while (eForm.hasMoreElements() && eAct.hasMoreElements())
@@ -376,13 +376,20 @@ class FeaturesTable
 			if (!ClassTable.getInstance().isSubClass(
 					TypeCheckerHelper.inferSelfType(actualParam.get_type(), currentClass.getName()),
 					TypeCheckerHelper.inferSelfType(formalParam.getTypeDecl(), owner.getName())))
+			{
+				SemantErrorsManager.getInstance().semantError(node, "In call of method %s, type %s of parameter %s does not conform to declared type %s.", 
+						methodName, actualParam.get_type(), formalParam.getName(), formalParam.getTypeDecl());
 				return false;
+			}
 		}
 		
 		//if the dispatch uses more params than the params needed, one of the two lists has still some elements
 		//so the invocation is wrong
 		if (eForm.hasMoreElements() || eAct.hasMoreElements() )
+		{
+			SemantErrorsManager.getInstance().semantError(node, "Method %s called with wrong number of arguments.", methodName);
 			return false;
+		}
 		
 		return true;
 	}

@@ -411,8 +411,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 						TypeCheckerHelper.validateCast(null, letIdType, initType);
 					} catch (SemanticException e) {
 						//Inferred type Int of initialization of x does not conform to identifier's declared type String.
-						semant_errors.semantError(obj, "Inferred type " + letIdType + " of initialization of "
-								+ letId + " does not conform to identifier's declared type " + initType);	
+						semant_errors.semantError(obj, "Inferred type " + initType + " of initialization of "
+								+ letId + " does not conform to identifier's declared type " + letIdType + ".");	
 					}
 				}
 				semant_state.getScopeManager().enterScope();
@@ -440,6 +440,11 @@ class TypeCheckerVisitor implements ITreeVisitor
 					semant_errors.semantError(obj, "Undeclared identifier %s.", obj.getName());
 				}
 				obj.decorate("rt", stype);
+				if (type == null)
+				{		
+					obj.decorate("validType", false);
+					type = ClassTable.getInstance().lookup(TreeConstants.Object_);
+				}
 				return obj.set_type(TypeCheckerHelper.inferSelfType(type.getName()));	
 			}
 	
@@ -849,31 +854,34 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(dispatch obj) 
 			{
+				Expression leftExpr = obj.getExpr();
+				AbstractSymbol fallbackType = null;
 				ClassTable cTbl = ClassTable.getInstance();
-				
-				Class_ myCls = cTbl.lookup(TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("expr_type"))); // the expr class, it's self
-				// it should never enter in this if statement
-				if (myCls == null)	// if the dispatch caller class is not defined
+				AbstractSymbol clsName = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("expr_type"));
+				boolean validExpr = leftExpr.getData("validType") != null ? (Boolean) leftExpr.getData("validType") : true;
+				Class_ myCls = cTbl.lookup(clsName); // the expr class, it's self
+				if (myCls == null || !validExpr)	// if the dispatch caller class is not defined
 				{
-//					System.out.println("myCls is null " + myCls.getName());
-					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+					semant_errors.semantError(obj, "Dispatch to undefined class %s.", leftExpr.getData("rt"));
+					return obj.set_type(TreeConstants.Object_);
 				}
 				
 				// this validation, validates the actuals params too
 				boolean isValid = FeaturesTable.validateDispatch(myCls.getName(), obj);
 				if (!isValid)
 				{
-//					System.out.println("isValid not " + myCls.getName() + " " + obj.getName());
-					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
+					fallbackType = TreeConstants.Object_;
 				}
 				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj.getName());
 				if (meth == null)
 				{
 					semant_errors.semantError(obj, "Dispatch to undefined method %s.", obj.getName());
+					fallbackType = TreeConstants.Object_;
 				}
-//				System.out.println(obj.getLineNumber() + " aad " + meth.getReturnType() + " " + obj.getExpr().get_type() );
-//				System.out.println(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
 				
+				if (fallbackType != null)
+					return obj.set_type(fallbackType);
+
 				if (obj.getExpr().equals(TreeConstants.self) && meth.getReturnType().equals(TreeConstants.SELF_TYPE))
 				{
 					obj.decorate("rt", meth.getReturnType());
@@ -916,6 +924,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 					semant_errors.semantError(obj,
 							"Expression type %s does not conform to declared static dispatch type %s.",
 							mySym, typeSym);
+					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
 				
 				// this validation, validates the actuals params too
@@ -949,10 +958,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(assign obj) 
 			{
 				AbstractSymbol varName = obj.getName();
+				
+				if (varName.equals(TreeConstants.self))
+				{			
+					semant_errors.semantError(obj, "Cannot assign to 'self'.");
+					
+				}
+				
 				AbstractSymbol exprType = (AbstractSymbol) obj.getData("expr");
 				
 				AbstractSymbol symType = (AbstractSymbol) semant_state.getScopeManager().lookup(varName);  
-				Class_ cls = ClassTable.getInstance().lookup(symType);
+				Class_ cls = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(symType));
 				AbstractSymbol varType = cls.getName();
 						
 						
@@ -962,20 +978,13 @@ class TypeCheckerVisitor implements ITreeVisitor
 					semant_errors.semantError(obj, "Assignment to undeclared variable %s.", varName);
 				}
 				
-				//check the name of the identifier
-				if(varName.equals(TreeConstants.self))
-				{			
-					semant_errors.semantError(obj, "Type " + exprType +
-							" of assigned expression does not conform to declared type " +
-							   varType +" of identifier "+ varName +".");
-	
-				}
 				
 				//check if the expression can be assigned to the variable
 				if(!ClassTable.getInstance().isSubClass(exprType, varType))
 				{
-					semant_errors.semantError(obj," Type "+ exprType + " of assigned expression does not conform to declared type "+
-									varType +" of identifier "+ varName +".");
+					semant_errors.semantError(obj, "Type "+ exprType + " of assigned expression does not conform to declared type "+
+							symType +" of identifier "+ varName +".");
+					varType = TreeConstants.Object_;
 				}
 				
 				return obj.set_type(varType);
