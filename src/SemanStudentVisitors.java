@@ -340,7 +340,10 @@ class FeaturesVisitor extends DefaultVisitor
 		});
 
 		if(!class_table.isClassRegistered(TreeConstants.Main))
-			err_mgr.fatal("Class Main is not defined.");
+		{
+			err_mgr.semantError().println("Class Main is not defined.");
+			return;
+		}
 		
 		if(FeaturesTable.lookupMethod(TreeConstants.Main, TreeConstants.main_meth) == null)
 			err_mgr.semantError(class_table.lookup(TreeConstants.Main),"No 'main' method in class Main.");
@@ -354,7 +357,7 @@ class FeaturesVisitor extends DefaultVisitor
 		ClassTable tbl = ClassTable.getInstance();
 		tbl.installBasicClasses();
 	    tbl.validate();
-		SemantErrorsManager.getInstance().validate();
+		SemantErrorsManager.getInstance().validate(true);
 	}
 }
 
@@ -434,11 +437,17 @@ class TypeCheckerVisitor implements ITreeVisitor
 					return obj.set_type(TreeConstants.SELF_TYPE);
 				}
 				AbstractSymbol stype = (AbstractSymbol) semant_state.getScopeManager().lookup(obj.getName());
-				Class_ type = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(stype));
+				Class_ type = null;
 				if (stype == null)
 				{
 					semant_errors.semantError(obj, "Undeclared identifier %s.", obj.getName());
 				}
+				else
+				{
+					type = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(stype));
+				}
+				
+
 				obj.decorate("rt", stype);
 				if (type == null)
 				{		
