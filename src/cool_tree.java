@@ -969,7 +969,7 @@ class static_dispatch extends Expression {
 		
 		actual.accept(visitor);
 		decorate("expr_type", expr_type);
-		decorate("typeid_type", type_name);
+		
 		visitor.onVisitPostOrder(this);
 		return get_type();
 	}
@@ -978,7 +978,7 @@ class static_dispatch extends Expression {
 		return expr;
 	}
 
-	public AbstractSymbol getType_name() {
+	public AbstractSymbol getTypeName() {
 		return type_name;
 	}
 

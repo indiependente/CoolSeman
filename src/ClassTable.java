@@ -423,14 +423,14 @@ class ClassTable {
     	AbstractSymbol parent = sym;
     	while (!parent.equals(object))
     	{
-    		if (parent == null) 
-    			throw new RuntimeException("parent is null on " + sym);
+//    		if (parent == null) 
+//    			throw new RuntimeException("parent is null on " + sym);
     		Class_ cls = table.get(parent);
-    		if(cls == null)
-    			throw new RuntimeException("cls is null on " + sym);
+//    		if(cls == null)
+//    			throw new RuntimeException("cls is null on " + sym);
     		parent = cls.getParent();
-    		if(parent == null) 
-    			throw new RuntimeException("parent is again null on " + sym + " and " + cls.getName());
+//    		if (parent == null) 
+//    			throw new RuntimeException("parent is again null on " + sym + " and " + cls.getName());
     		ret.add(parent);
     	}
     	return ret;
@@ -483,7 +483,7 @@ class ClassTable {
 		}
     	for (AbstractSymbol it : list_sym1)
     	{
-    		if(map.containsKey(it)) 
+    		if (map.containsKey(it)) 
     			return it;
     	}    	
     	return AbstractTable.idtable.addString("Object");

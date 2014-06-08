@@ -729,12 +729,10 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(let obj) 
 			{
-				
-				
-				semant_state.getScopeManager().exitScope();
-								
+				semant_state.getScopeManager().exitScope();			
 				//set the return type to the block's return type
 				AbstractSymbol ret_type = (AbstractSymbol) obj.getData("ret_body");
+				obj.decorate("rt", obj.getBody().getData("rt"));
 				return obj.set_type(ret_type);
 			}
 	
@@ -891,10 +889,10 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(static_dispatch obj) 
 			{
 				ClassTable cTbl = ClassTable.getInstance();
-				AbstractSymbol mySym = (AbstractSymbol)obj.getData("expr_type");
-				AbstractSymbol typeSym = (AbstractSymbol)obj.getData("typeid_type");
+				AbstractSymbol mySym = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("expr_type"));
+				AbstractSymbol typeSym = obj.getTypeName();
 				
-				if (typeSym.equals("SELF_TYPE"))
+				if (typeSym.equals(TreeConstants.SELF_TYPE))
 				{
 					semant_errors.semantError(obj, "Static dispatch to SELF_TYPE.");
 					return obj.set_type(TreeConstants.Object_);	// set static dispatch type to object
@@ -950,8 +948,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 				AbstractSymbol varName = obj.getName();
 				AbstractSymbol exprType = (AbstractSymbol) obj.getData("expr");
 				
-				Class_ nameClass = (Class_) semant_state.getScopeManager().lookup(varName);  
-				AbstractSymbol varType = nameClass.getName();
+				Class_ cls = (Class_) semant_state.getScopeManager().lookup(varName);  
+				AbstractSymbol varType = cls.getName();
 						
 						
 				//check if the identifier is declared
