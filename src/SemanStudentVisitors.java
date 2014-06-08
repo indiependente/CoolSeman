@@ -417,7 +417,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				}
 				semant_state.getScopeManager().enterScope();
 				
-				semant_state.getScopeManager().addId(obj.getIdentifier(), ClassTable.getInstance().lookup(letIdType));
+				semant_state.getScopeManager().addId(obj.getIdentifier(), letIdType);
 				
 				return null;
 			}	
@@ -433,11 +433,13 @@ class TypeCheckerVisitor implements ITreeVisitor
 //					System.out.println("self qui in object");
 					return obj.set_type(TreeConstants.SELF_TYPE);
 				}
-				Class_ type = (Class_) semant_state.getScopeManager().lookup(obj.getName());
-				if (type == null)
+				AbstractSymbol stype = (AbstractSymbol) semant_state.getScopeManager().lookup(obj.getName());
+				Class_ type = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(stype));
+				if (stype == null)
 				{
 					semant_errors.semantError(obj, "Undeclared identifier %s.", obj.getName());
 				}
+				obj.decorate("rt", stype);
 				return obj.set_type(TypeCheckerHelper.inferSelfType(type.getName()));	
 			}
 	
@@ -567,6 +569,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 					boolean rightPtrCheck = !(TypeCheckerHelper.typeMatchAny(inf_right_type, TreeConstants.Int,
 							TreeConstants.Bool, TreeConstants.Str));
 					
+				
 					if (!(leftPtrCheck && rightPtrCheck))
 					{
 						TypeCheckerHelper.typeMatch(inf_left_type, inf_right_type);
@@ -948,7 +951,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 				AbstractSymbol varName = obj.getName();
 				AbstractSymbol exprType = (AbstractSymbol) obj.getData("expr");
 				
-				Class_ cls = (Class_) semant_state.getScopeManager().lookup(varName);  
+				AbstractSymbol symType = (AbstractSymbol) semant_state.getScopeManager().lookup(varName);  
+				Class_ cls = ClassTable.getInstance().lookup(symType);
 				AbstractSymbol varType = cls.getName();
 						
 						
@@ -1176,8 +1180,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 		
 		semant_state.getScopeManager().enterScope();
 		
-		semant_state.getScopeManager().addId(branch.getName(), ClassTable.getInstance().lookup(static_type_symbol));
-		
+		//semant_state.getScopeManager().addId(branch.getName(), ClassTable.getInstance().lookup(static_type_symbol));
+		semant_state.getScopeManager().addId(branch.getName(), static_type_symbol);
 		return null;
 	}
 

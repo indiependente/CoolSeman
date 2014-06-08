@@ -493,10 +493,11 @@ class class_c extends Class_ {
 		 * controllare che se la classe e' Main allora deve avere main senza parametri formali
 		 * main deve essere presente e non ereditato
 		 */
-		visitor.onVisitPreOrder(this);
 		SemantState.getInstance().setCurrentClass(this);
+		visitor.onVisitPreOrder(this);
 		features.accept(visitor);
 		visitor.onVisitPostOrder(this);
+		SemantState.getInstance().setCurrentClass(null);
 		return null;
 	}
 	

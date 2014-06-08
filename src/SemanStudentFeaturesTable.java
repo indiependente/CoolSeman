@@ -330,9 +330,9 @@ class FeaturesTable
 		for (Feature f : ancClazz.getFeaturesTable().getFeaturesList().values())
 		{
 			
-			Class_ featureClazz = cTbl.lookup(TypeCheckerHelper.inferSelfType(f.getReturnType()));
+			//Class_ featureClazz = cTbl.lookup(TypeCheckerHelper.inferSelfType(f.getReturnType(), sym));
 			
-			symTab.addId(f.getFeatureName(), featureClazz);
+			symTab.addId(f.getFeatureName(), f.getReturnType());
 		}
 	}
 	
@@ -354,7 +354,8 @@ class FeaturesTable
 		{
 			Formal f = (Formal) formals.nextElement();
 			Class_ classOfThisFormal = ClassTable.getInstance().lookup(f.getTypeDecl());
-			symTab.addId(f.getName(), classOfThisFormal);
+			//symTab.addId(f.getName(), classOfThisFormal);
+			symTab.addId(f.getName(), f.getTypeDecl());
 		}
 	}
 	
