@@ -47,10 +47,21 @@ class TypeCheckerHelper
 	 */
 	static void validateCast(TreeNode node, AbstractSymbol child, AbstractSymbol parent) throws SemanticException
 	{
+		validateCast(node, child, parent,"Invalid cast: can't cast type %s to type %s");
+	}
+	
+	/**
+	 * this method checks if it's possible to cast a certain class to another one,
+	 * that is if former class is equal or a subclass of the latter
+	 * @param child 
+	 * @param parent
+	 */
+	static void validateCast(TreeNode node, AbstractSymbol child, AbstractSymbol parent, String msg) throws SemanticException
+	{
 		if (!(child.equals(parent) || class_table.isSubClass(child, parent)))
 		{
 			if (node != null)
-				semant_error.semantError(node, "Invalid cast: can't cast type %s to type %s", child, parent);	
+				semant_error.semantError(node, msg, child, parent);	
 			throw new SemanticException();
 		}	
 	}

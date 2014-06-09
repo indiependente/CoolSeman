@@ -905,6 +905,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 			@Override
 			public Object action(static_dispatch obj) 
 			{
+				Expression leftExpr = obj.getExpr();
+				boolean validExpr = leftExpr.getData("validType") != null ? (Boolean) leftExpr.getData("validType") : true;
 				ClassTable cTbl = ClassTable.getInstance();
 				AbstractSymbol mySym = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("expr_type"));
 				AbstractSymbol typeSym = obj.getTypeName();
@@ -918,12 +920,24 @@ class TypeCheckerVisitor implements ITreeVisitor
 				Class_ myCls = cTbl.lookup(mySym); // the expr class
 				Class_ typeCls = cTbl.lookup(typeSym); // the expr@type class
 				
-				// it should never enter in this if statement
 				if (myCls == null)	// if the dispatch caller class is not defined
 				{
 					semant_errors.semantError(obj, "Static dispatch to undefined class %s.", typeSym);
 					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
+				
+				method meth = FeaturesTable.lookupMethod(typeSym, obj.getName());
+				if (meth == null)
+				{
+					semant_errors.semantError(obj, "Static dispatch to undefined method %s.", obj.getName());
+				}
+				
+				if (obj.getExpr().equals(TreeConstants.self) && meth.getReturnType().equals(TreeConstants.SELF_TYPE))
+				{
+					obj.decorate("rt", meth.getReturnType());
+				}
+				
+				AbstractSymbol returnType = TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName());
 				
 				if (!ClassTable.getInstance().isSubClass(myCls, typeCls))
 				{
@@ -940,18 +954,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
 				
-				method meth = FeaturesTable.lookupMethod(typeSym, obj.getName());
-				if (meth == null)
-				{
-					semant_errors.semantError(obj, "Static dispatch to undefined method %s.", obj.getName());
-				}
 				
-				if (obj.getExpr().equals(TreeConstants.self) && meth.getReturnType().equals(TreeConstants.SELF_TYPE))
-				{
-					obj.decorate("rt", meth.getReturnType());
-				}
 				
-				return obj.set_type(TypeCheckerHelper.inferSelfType(meth.getReturnType(), myCls.getName()));
+				return obj.set_type(returnType);
 
 			}
 	
@@ -1018,7 +1023,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 		{
 			TypeCheckerHelper.validateType(dynamic_return_type_symbol);
 			TypeCheckerHelper.validateType(static_return_type_symbol);
-			TypeCheckerHelper.validateCast(mth, dynamic_return_type_symbol, static_return_type_symbol);
+			TypeCheckerHelper.validateCast(mth, dynamic_return_type_symbol, static_return_type_symbol,
+					"Inferred return type %s of method "+mth.getFeatureName()+" does not conform to declared return type %s.");
 		}
 		catch (SemanticException e)
 		{		
