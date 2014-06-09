@@ -959,7 +959,7 @@ class static_dispatch extends Expression {
 		 * valutare il tipo di expr, tradurre self in SELF_TYPE
 		 * fare il lookup di type_name, ma non deve essere SELF_TYPE -> farlo diventare Object
 		 * vedere se expr e' sottotipo di TYPE
-		 * vedere se name è registrato per TYPE
+		 * vedere se name e' registrato per TYPE
 		 * validare actuals
 		 * vedere se per ogni param matcha con la dichiarazione del metodo
 		 * assegnare il tipo al nodo

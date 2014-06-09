@@ -864,7 +864,6 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(dispatch obj) 
 			{
 				Expression leftExpr = obj.getExpr();
-				AbstractSymbol fallbackType = null;
 				ClassTable cTbl = ClassTable.getInstance();
 				AbstractSymbol clsName = TypeCheckerHelper.inferSelfType((AbstractSymbol) obj.getData("expr_type"));
 				boolean validExpr = leftExpr.getData("validType") != null ? (Boolean) leftExpr.getData("validType") : true;
@@ -875,22 +874,20 @@ class TypeCheckerVisitor implements ITreeVisitor
 					return obj.set_type(TreeConstants.Object_);
 				}
 				
-				// this validation, validates the actuals params too
-				boolean isValid = FeaturesTable.validateDispatch(myCls.getName(), obj);
-				if (!isValid)
-				{
-					fallbackType = TreeConstants.Object_;
-				}
 				method meth = FeaturesTable.lookupMethod(myCls.getName(), obj.getName());
 				if (meth == null)
 				{
 					semant_errors.semantError(obj, "Dispatch to undefined method %s.", obj.getName());
-					fallbackType = TreeConstants.Object_;
+					return obj.set_type(TreeConstants.Object_);
 				}
 				
-				if (fallbackType != null)
-					return obj.set_type(fallbackType);
-
+				// this validation, validates the actuals params too
+				boolean isValid = FeaturesTable.validateDispatch(myCls.getName(), obj);
+				if (!isValid)
+				{
+					return obj.set_type(TreeConstants.Object_);
+				}
+				
 				if (obj.getExpr().equals(TreeConstants.self) && meth.getReturnType().equals(TreeConstants.SELF_TYPE))
 				{
 					obj.decorate("rt", meth.getReturnType());
