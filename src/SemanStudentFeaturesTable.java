@@ -68,7 +68,7 @@ class FeaturesTable
 			SemantErrorsManager.getInstance()
 			.semantError(a, "Class %s of attribute %s is undefined.", 
 					a.getReturnType(), a.getFeatureName());
-			return;
+			//return;
 		}
 
 		featuresList.put( a.getFeatureName(), a );
@@ -116,7 +116,7 @@ class FeaturesTable
 			.semantError(m,
 					"Undefined return type %s in method %s.",
 					m.getReturnType(), m.getName());
-			return;
+			//return;
 		}
 		
 		/*	Formals type checking	*/
@@ -131,7 +131,7 @@ class FeaturesTable
 				.semantError(m,
 						"Formal parameter %s cannot have type SELF_TYPE.",
 						f.getName(), f.getTypeDecl());
-				return;
+				//return;
 			}
 			try {
 				TypeCheckerHelper.validateType( f.getTypeDecl() );
@@ -141,7 +141,7 @@ class FeaturesTable
 				.semantError(SemantState.getInstance().getCurrentClass(),
 						"Class %s of formal parameter %s is undefined.",
 						f.getTypeDecl(), f.getName());
-				return;
+				//return;
 			}
 			
 			

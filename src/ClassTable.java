@@ -513,7 +513,7 @@ class ClassTable {
     	
     	// primitive types are not subclasses of Object
     	
-    	if (TypeCheckerHelper.typeMatchAny(child, TreeConstants.Str, TreeConstants.Int, TreeConstants.Bool))
+    	if (TypeCheckerHelper.typeMatchAny(child, TreeConstants.Int, TreeConstants.Bool))
     	{
     		return child.equals(parent);
     	}

@@ -126,7 +126,8 @@ class SemantErrorsManager
 	public void validate(boolean stop) {
 		if (SemantErrorsManager.getInstance().errors()) {
 			System.err.println("Compilation halted due to static semantic errors.");
-			if (stop) System.exit(1);
+			if (stop) 
+				System.exit(1);
 		}
 		
 	}

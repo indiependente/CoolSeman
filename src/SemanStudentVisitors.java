@@ -348,7 +348,7 @@ class FeaturesVisitor extends DefaultVisitor
 		if(FeaturesTable.lookupMethod(TreeConstants.Main, TreeConstants.main_meth) == null)
 			err_mgr.semantError(class_table.lookup(TreeConstants.Main),"No 'main' method in class Main.");
 
-		err_mgr.validate();
+		//err_mgr.validate();
 	}
 	
 	@Override
@@ -446,8 +446,6 @@ class TypeCheckerVisitor implements ITreeVisitor
 				{
 					type = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(stype));
 				}
-				
-
 				obj.decorate("rt", stype);
 				if (type == null)
 				{		
@@ -920,9 +918,9 @@ class TypeCheckerVisitor implements ITreeVisitor
 				Class_ myCls = cTbl.lookup(mySym); // the expr class
 				Class_ typeCls = cTbl.lookup(typeSym); // the expr@type class
 				
-				if (myCls == null)	// if the dispatch caller class is not defined
+				if (myCls == null || !validExpr)	// if the dispatch caller class is not defined
 				{
-					semant_errors.semantError(obj, "Static dispatch to undefined class %s.", typeSym);
+					semant_errors.semantError(obj, "Static dispatch to undefined class %s.", leftExpr.getData("rt"));
 					return obj.set_type(TreeConstants.Object_);	// set dispatch type to object
 				}
 				
