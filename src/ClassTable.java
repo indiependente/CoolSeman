@@ -513,11 +513,6 @@ class ClassTable {
     	
     	// primitive types are not subclasses of Object
     	
-    	if (TypeCheckerHelper.typeMatchAny(child, TreeConstants.Int, TreeConstants.Bool))
-    	{
-    		return child.equals(parent);
-    	}
-    	
     	if (child.equals(parent))
     		return true;
     	ArrayList<AbstractSymbol> list = getParents(child);
