@@ -322,6 +322,46 @@ class FeaturesVisitor extends DefaultVisitor
 	{
 		SemantErrorsManager err_mgr = SemantErrorsManager.getInstance();
 		ClassTable class_table = ClassTable.getInstance();
+/*		
+		class_table.lookup(TreeConstants.Object_).accept(this);
+//		class_table.lookup(TreeConstants.Bool).accept(this);
+//		class_table.lookup(TreeConstants.Int).accept(this);
+		class_table.lookup(TreeConstants.IO).accept(this);
+//		class_table.lookup(TreeConstants.Str).accept(this);
+		
+		class_table.lookup(TreeConstants.Str).accept(new DefaultVisitor()
+		{
+			@Override
+			public Object onVisitPostOrder(method meth) {
+				Class_ cls = SemantState.getInstance().getCurrentClass();
+				cls.getFeaturesTable().registerMethod(meth);
+				return null;
+			}
+		});
+*/
+		if(!class_table.isClassRegistered(TreeConstants.Main))
+		{
+			err_mgr.semantError().println("Class Main is not defined.");
+			return;
+		}
+		
+		if(FeaturesTable.lookupMethod(TreeConstants.Main, TreeConstants.main_meth) == null)
+			err_mgr.semantError(class_table.lookup(TreeConstants.Main),"No 'main' method in class Main.");
+
+		//err_mgr.validate();
+	}
+	
+	@Override
+	public void onVisitStart()
+	{
+		/*	Install basic classes in the class table	*/
+		ClassTable tbl = ClassTable.getInstance();
+		tbl.installBasicClasses();
+	    tbl.validate();
+		SemantErrorsManager.getInstance().validate(true);
+		/*	And their features in the features table	*/
+		SemantErrorsManager err_mgr = SemantErrorsManager.getInstance();
+		ClassTable class_table = ClassTable.getInstance();
 		
 		class_table.lookup(TreeConstants.Object_).accept(this);
 //		class_table.lookup(TreeConstants.Bool).accept(this);
@@ -339,25 +379,7 @@ class FeaturesVisitor extends DefaultVisitor
 			}
 		});
 
-		if(!class_table.isClassRegistered(TreeConstants.Main))
-		{
-			err_mgr.semantError().println("Class Main is not defined.");
-			return;
-		}
 		
-		if(FeaturesTable.lookupMethod(TreeConstants.Main, TreeConstants.main_meth) == null)
-			err_mgr.semantError(class_table.lookup(TreeConstants.Main),"No 'main' method in class Main.");
-
-		//err_mgr.validate();
-	}
-	
-	@Override
-	public void onVisitStart()
-	{
-		ClassTable tbl = ClassTable.getInstance();
-		tbl.installBasicClasses();
-	    tbl.validate();
-		SemantErrorsManager.getInstance().validate(true);
 	}
 }
 

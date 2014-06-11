@@ -70,7 +70,7 @@ class FeaturesTable
 					a.getReturnType(), a.getFeatureName());
 			//return;
 		}
-
+		
 		featuresList.put( a.getFeatureName(), a );
 	}
 	  
@@ -95,19 +95,21 @@ class FeaturesTable
 		if (ancestorMeth != null)	/*	so you're overriding it uh	*/
 		{	
 			/*	redefined method does not match original return type	*/
-			if (!ancestorMeth.getReturnType().getString().equals(m.getReturnType().getString()))
+			if (!ancestorMeth.getReturnType().equals(m.getReturnType()))
 			{	
 				SemantErrorsManager.getInstance()
 				.semantError(m,
-						"In redefined method "+ m.getName().getString() 
-						+ ", return type "+ m.getReturnType().getString()
-						+ " is different from original return type "+ ancestorMeth.getReturnType().getString() +" .");
+						"In redefined method %s, return type %s is different from original return type %s.",
+						m.getName().getString(), m.getReturnType().getString(),
+						ancestorMeth.getReturnType().getString());
 				return;
 			}
+			/*	Formals validation*/
 			if (!validateFormals(m, ancestorMeth))
 				return;
+			
 		}	/*	End of overriding checks	*/
-
+		
 		/*	Method return type checking	*/
 		try {
 			TypeCheckerHelper.validateType(TypeCheckerHelper.inferSelfType(m.getReturnType()));
@@ -169,10 +171,9 @@ class FeaturesTable
 			{
 				SemantErrorsManager.getInstance()
 				.semantError(m,
-						"In redefined method "+m.getName().getString()
-						+ ", parameter type "+mParam.getTypeDecl().getString()
-						+ " is different from original type "
-						+ ancestorParam.getTypeDecl().getString());	
+						"In redefined method %s, parameter type %s is different from original type %s",
+						m.getName().getString(), mParam.getTypeDecl().getString(),
+						ancestorParam.getTypeDecl().getString());	
 				return false;
 			}
 		}
@@ -181,8 +182,7 @@ class FeaturesTable
 		if(mForm.hasMoreElements() || ancestorMethForm.hasMoreElements() )
 		{	SemantErrorsManager.getInstance()
 			.semantError(m,
-					"Incompatible number of formal parameters in redefined method "+
-							m.getName().getString() + ".");
+					"Incompatible number of formal parameters in redefined method %s.", m.getName().getString());
 			return false;
 		}
 		return true;
