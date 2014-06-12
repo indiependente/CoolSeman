@@ -117,15 +117,15 @@ class SemantState
 {
 	static SemantState state=null;
 	private Class_ current_class;
-	private SymbolTable scope_manager;
+	private SymbolTable<AbstractSymbol> scope_manager;
 	
 	private SemantState()
 	{
 		current_class = null;
-		scope_manager = new SymbolTable();
+		scope_manager = new SymbolTable<AbstractSymbol>();
 	}
 	
-	public SymbolTable getScopeManager() 
+	public SymbolTable<AbstractSymbol> getScopeManager() 
 	{
 		return scope_manager;
 	}

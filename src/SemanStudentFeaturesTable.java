@@ -298,7 +298,7 @@ class FeaturesTable
 		ArrayList<AbstractSymbol> ancestors = cTbl.getParents(sym);
 		
 		int numLevels = 0;
-		SymbolTable symTab = SemantState.getInstance().getScopeManager();
+		SymbolTable<AbstractSymbol> symTab = SemantState.getInstance().getScopeManager();
 		/*	Push the scope of sym's ancestors	*/
 		for (int i = ancestors.size()-1; i >= 0; i--)
 		{
@@ -346,7 +346,7 @@ class FeaturesTable
 		method meth = this.lookupMethod(sym);
 		if (meth == null) return; // it should never be null
 
-		SymbolTable symTab = SemantState.getInstance().getScopeManager();
+		SymbolTable<AbstractSymbol> symTab = SemantState.getInstance().getScopeManager();
 		Enumeration formals = meth.getFormals().getElements();
 		symTab.enterScope();
 		

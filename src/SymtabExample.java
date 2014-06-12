@@ -23,7 +23,7 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 class SymtabExample {
     public static void main(String args[]) {
 	// crate a new symbol table; entries will be name/age pairs
-	SymbolTable map = new SymbolTable();
+	SymbolTable map = new SymbolTable<Object>();
 
 	// create some names
 	AbstractSymbol fred = AbstractTable.stringtable.addString("Fred");

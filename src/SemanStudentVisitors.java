@@ -1,10 +1,7 @@
-import java.beans.FeatureDescriptor;
-import java.util.ArrayList;
-import java.util.Enumeration;
+
 import java.util.HashMap;
 import java.util.Vector;
 
-import org.jgrapht.generate.RingGraphGenerator;
 
 
 /**
@@ -48,7 +45,7 @@ abstract class Decorator
  *
  */
 interface ITreeVisitor {
-	
+	 
 	Object onVisitPostOrder(method itm);
 	Object onVisitPostOrder(attr itm);
 	Object onVisitPostOrder(Cases cases);
@@ -355,13 +352,13 @@ class FeaturesVisitor extends DefaultVisitor
 	public void onVisitStart()
 	{
 		/*	Install basic classes in the class table	*/
-		ClassTable tbl = ClassTable.getInstance();
-		tbl.installBasicClasses();
-	    tbl.validate();
+		final ClassTable class_table = ClassTable.getInstance();
+		
+		class_table.installBasicClasses();
+		class_table.validate();
 		SemantErrorsManager.getInstance().validate(true);
 		/*	And their features in the features table	*/
 		SemantErrorsManager err_mgr = SemantErrorsManager.getInstance();
-		ClassTable class_table = ClassTable.getInstance();
 		
 		class_table.lookup(TreeConstants.Object_).accept(this);
 //		class_table.lookup(TreeConstants.Bool).accept(this);
@@ -373,7 +370,7 @@ class FeaturesVisitor extends DefaultVisitor
 		{
 			@Override
 			public Object onVisitPostOrder(method meth) {
-				Class_ cls = SemantState.getInstance().getCurrentClass();
+				Class_ cls = class_table.lookup(TreeConstants.Str);
 				cls.getFeaturesTable().registerMethod(meth);
 				return null;
 			}
@@ -458,7 +455,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 //					System.out.println("self qui in object");
 					return obj.set_type(TreeConstants.SELF_TYPE);
 				}
-				AbstractSymbol stype = (AbstractSymbol) semant_state.getScopeManager().lookup(obj.getName());
+				AbstractSymbol stype = semant_state.getScopeManager().lookup(obj.getName());
 				Class_ type = null;
 				if (stype == null)
 				{
@@ -998,7 +995,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				
 				AbstractSymbol exprType = (AbstractSymbol) obj.getData("expr");
 				
-				AbstractSymbol symType = (AbstractSymbol) semant_state.getScopeManager().lookup(varName);  
+				AbstractSymbol symType = semant_state.getScopeManager().lookup(varName);  
 				Class_ cls = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(symType));
 				AbstractSymbol varType = cls.getName();
 						
