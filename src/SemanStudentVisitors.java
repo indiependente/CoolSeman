@@ -547,6 +547,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 				} 
 				catch (SemanticException e) {
 					semant_errors.semantError(obj, "'new' used with undefined class %s", type);
+					return obj.set_type(TreeConstants.Object_);
 				}
 				return obj.set_type(type);	
 			}
@@ -997,10 +998,14 @@ class TypeCheckerVisitor implements ITreeVisitor
 				
 				AbstractSymbol symType = semant_state.getScopeManager().lookup(varName);  
 				Class_ cls = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(symType));
+				if (cls == null)
+				{
+					semant_errors.semantError(obj, "Type %s of identifier %s is undeclared.",
+							symType, varName);
+				}
+				
 				AbstractSymbol varType = cls.getName();
-						
-						
-				//check if the identifier is declared
+				//check if the type is declared
 				if( varType == null)
 				{
 					semant_errors.semantError(obj, "Assignment to undeclared variable %s.", varName);
