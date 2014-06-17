@@ -471,7 +471,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 					obj.decorate("validType", false);
 					type = ClassTable.getInstance().lookup(TreeConstants.Object_);
 				}
-				return obj.set_type(TypeCheckerHelper.inferSelfType(type.getName()));	
+//				return obj.set_type(TypeCheckerHelper.inferSelfType(type.getName()));	
+				return obj.set_type(type.getName());
 			}
 	
 		});
@@ -811,16 +812,13 @@ class TypeCheckerVisitor implements ITreeVisitor
 			public Object action(loop obj) 
 			{
 				AbstractSymbol pred_type = (AbstractSymbol)obj.getData("pred");
-				
 				try {
 					TypeCheckerHelper.validateType(pred_type);
 					TypeCheckerHelper.typeMatch(pred_type, TreeConstants.Bool);
 				} catch (SemanticException e) {
-					 semant_errors.semantError(obj,"Loop condition does not have type Bool.");
+					 semant_errors.semantError(obj, "Loop condition does not have type Bool.");
 				}
-				
 				return obj.set_type(TreeConstants.Object_);
-				
 			}
 	
 		});

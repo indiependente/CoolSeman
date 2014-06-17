@@ -533,6 +533,7 @@ class ClassTable {
      */
     public boolean isSuperClass(AbstractSymbol parent, AbstractSymbol child)
     {
+    	/*
     	if (child.equals(parent))
     		return true;
     	ArrayList<AbstractSymbol> list = getParents(child);
@@ -542,6 +543,8 @@ class ClassTable {
     			return true;
     	}
     	return false;
+    	*/
+    	return isSubClass(child, parent);
     }
     
     /**
