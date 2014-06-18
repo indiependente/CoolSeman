@@ -327,15 +327,24 @@ class Cases extends ListNode {
 		lub.toArray(lubArray);
 		lubRT.toArray(lubRTArray);
 
-if(!containsNULL)
-		if (howManySelfType == size)
-			decorate("rt", TreeConstants.SELF_TYPE);
-		else
-			if (howManySelfType == 0)
-				decorate("rt", ClassTable.getInstance().leastUpperBound(lubRTArray));
+		if (!containsNULL) 
+		{
+			if (howManySelfType == size)
+			{
+				decorate("rt", TreeConstants.SELF_TYPE);
+			}
 			else
-				decorate("rt", ClassTable.getInstance().leastUpperBound(TypeCheckerHelper.inferSelfType(lubRTArray)));
-
+			{
+				if (howManySelfType == 0)
+				{
+					decorate("rt", ClassTable.getInstance().leastUpperBound(lubRTArray));
+				}
+				else
+				{
+					decorate("rt", ClassTable.getInstance().leastUpperBound(TypeCheckerHelper.inferSelfType(lubRTArray)));
+				}
+			}
+		}
 		decorate("type_list", lubArray);
 		/*
 		 * calcolare il lub di tutti i branch e restituirlo
@@ -875,6 +884,11 @@ class assign extends Expression {
 	 * @param s the output stream 
 	 * */
 	public void code(PrintStream s) {
+	}
+	
+	public Expression getExpr()
+	{
+		return expr;
 	}
 
 	@Override

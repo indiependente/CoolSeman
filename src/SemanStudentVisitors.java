@@ -993,6 +993,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 				}
 				
 				AbstractSymbol exprType = (AbstractSymbol) obj.getData("expr");
+//				boolean validExpr = obj.getExpr().getData("validType") != null ? 
+//						(Boolean) obj.getExpr().getData("validType") : true;
 				
 				AbstractSymbol symType = semant_state.getScopeManager().lookup(varName);  
 				Class_ cls = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(symType));
