@@ -13,8 +13,9 @@ class FeaturesTable
 	/**
 	 * The map that stores attributes and methods.
 	 */
-	private HashMap< AbstractSymbol , Feature > featuresList;
-	
+	private HashMap< AbstractSymbol, method> methodList;
+	private HashMap< AbstractSymbol, attr> attrList;
+
 	/**
 	 * The class that owns the features stored in the featureList
 	 */
@@ -27,13 +28,18 @@ class FeaturesTable
 	public FeaturesTable(Class_ c)
 	{
 		this.owner = c;
-		featuresList = new HashMap< AbstractSymbol , Feature >();
+		methodList = new HashMap< AbstractSymbol , method>();
+		attrList = new HashMap< AbstractSymbol , attr>();
 	}
 	
-	public HashMap<AbstractSymbol, Feature> getFeaturesList() {
-		return featuresList;
+	private HashMap<AbstractSymbol, method> getMethodList() {
+		return methodList;
 	}
 
+	private HashMap<AbstractSymbol, attr> getAttrList() {
+		return attrList;
+	}
+	
 	public Class_ getOwner() {
 		return owner;
 	}
@@ -45,7 +51,7 @@ class FeaturesTable
 	public void registerAttr(attr a)
 	{
 		/*	Check if the attribute is already defined	*/
-		if (featuresList.containsKey(a.getFeatureName()))
+		if (attrList.containsKey(a.getFeatureName()))
 		{
 			SemantErrorsManager.getInstance()
 			.semantError(a, "Attribute %s is multiply defined.", 
@@ -71,7 +77,7 @@ class FeaturesTable
 			//return;
 		}
 		
-		featuresList.put( a.getFeatureName(), a );
+		attrList.put( a.getFeatureName(), a );
 	}
 	  
 	/**
@@ -81,7 +87,7 @@ class FeaturesTable
 	public void registerMethod(method m)
 	{
 		/*	Check if the method is already defined	*/
-		if (featuresList.containsKey(m.getFeatureName()))
+		if (methodList.containsKey(m.getFeatureName()))
 		{
 			SemantErrorsManager.getInstance().semantError(SemantState.getInstance().getCurrentClass(),
 					"Method %s is multiply defined.", m.getFeatureName());
@@ -149,7 +155,7 @@ class FeaturesTable
 			
 		}
 
-		featuresList.put( m.getFeatureName(), m );
+		methodList.put( m.getFeatureName(), m );
 	}
 
 	/**	Check for formals types.
@@ -196,11 +202,12 @@ class FeaturesTable
 	 */
 	public attr lookupAttr(AbstractSymbol sym)
 	{
-		if ( featuresList.containsKey(sym) )
+		if ( attrList.containsKey(sym) )
 		{
-			if(featuresList.get(sym) instanceof attr)
-				return (attr) featuresList.get(sym);
-			else return null;
+//			if(attrList.get(sym) instanceof attr)
+//				return (attr) methodList.get(sym);
+//			else return null;
+			return attrList.get(sym);
 		}
 
 		else
@@ -219,10 +226,10 @@ class FeaturesTable
 	 */
 	public method lookupMethod(AbstractSymbol sym)
 	{
-		if ( featuresList.containsKey(sym) )
+		if ( methodList.containsKey(sym) )
 		{
-			if(featuresList.get(sym) instanceof method)
-				return (method) featuresList.get(sym);
+			if(methodList.get(sym) instanceof method)
+				return (method) methodList.get(sym);
 			else return null;
 		}
 
@@ -307,7 +314,7 @@ class FeaturesTable
 		}
 		
 		/*	Now it's my turn :D	*/
-		symTab.enterScope();
+//		symTab.enterScope();
 		numLevels++;
 		addClassFeaturesToLocalScope(sym, cTbl, symTab);
 		
@@ -324,10 +331,10 @@ class FeaturesTable
 	 * @param symTab
 	 * @param i
 	 */
-	private void addClassFeaturesToLocalScope(AbstractSymbol sym, ClassTable cTbl, SymbolTable symTab) {
+	private void addClassFeaturesToLocalScope(AbstractSymbol sym, ClassTable cTbl, SymbolTable<AbstractSymbol> symTab) {
 		symTab.enterScope();
 		Class_ ancClazz = cTbl.lookup(sym);
-		for (Feature f : ancClazz.getFeaturesTable().getFeaturesList().values())
+		for (Feature f : ancClazz.getFeaturesTable().getAttrList().values())
 		{
 			
 			//Class_ featureClazz = cTbl.lookup(TypeCheckerHelper.inferSelfType(f.getReturnType(), sym));

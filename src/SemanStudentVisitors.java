@@ -1098,7 +1098,8 @@ class TypeCheckerVisitor implements ITreeVisitor
 	@Override
 	public Object onVisitPostOrder(Class_ cls) {
 		 //cls.getFeaturesTable().loadClassScope(cls.getName());
-		for (int numScopes = (int) cls.getData("numScopes"); numScopes >= 0; numScopes--)
+//		for (int numScopes = (int) cls.getData("numScopes"); numScopes >= 0; numScopes--)
+		for (int numScopes = (int) cls.getData("numScopes"); numScopes > 0; numScopes--)
 			semant_state.getScopeManager().exitScope();
 		return null;
 	}
