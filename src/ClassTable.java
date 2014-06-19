@@ -511,6 +511,15 @@ class ClassTable {
     {
     	assert(child != null && parent != null);
     	
+    	// more checks for SELF_TYPE
+    	
+    	if (child.equals(TreeConstants.SELF_TYPE))
+    		child = TypeCheckerHelper.inferSelfType(child);
+    	
+
+    	if (parent.equals(TreeConstants.SELF_TYPE))
+    		parent = TypeCheckerHelper.inferSelfType(parent);
+    	
     	// primitive types are not subclasses of Object
     	
     	if (child.equals(parent))

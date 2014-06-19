@@ -997,7 +997,7 @@ class TypeCheckerVisitor implements ITreeVisitor
 //						(Boolean) obj.getExpr().getData("validType") : true;
 				
 				AbstractSymbol symType = semant_state.getScopeManager().lookup(varName);  
-				Class_ cls = ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(symType));
+				Class_ cls = (symType != null) ? ClassTable.getInstance().lookup(TypeCheckerHelper.inferSelfType(symType)) : null;
 				if (cls == null)
 				{
 					semant_errors.semantError(obj, "Type %s of identifier %s is undeclared.",
@@ -1012,15 +1012,15 @@ class TypeCheckerVisitor implements ITreeVisitor
 				}
 				
 				
-				//check if the expression can be assigned to the variable
-				if(!ClassTable.getInstance().isSubClass(exprType, varType))
+				//check if the infered expression can be assigned to the variable
+				if(!ClassTable.getInstance().isSubClass(TypeCheckerHelper.inferSelfType(exprType), varType))
 				{
 					semant_errors.semantError(obj, "Type "+ exprType + " of assigned expression does not conform to declared type "+
 							symType +" of identifier "+ varName +".");
 					varType = TreeConstants.Object_;
 				}
 				
-				return obj.set_type(varType);
+				return obj.set_type(symType);
 			}
 	
 		});
